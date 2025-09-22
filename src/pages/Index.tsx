@@ -21,6 +21,9 @@ const Index = () => {
               <Button variant="outline" asChild>
                 <Link to="/auth">Login Admin</Link>
               </Button>
+              <Button variant="secondary" asChild>
+                <Link to="/setup-admin">Setup Admin</Link>
+              </Button>
             </div>
           </div>
         </div>

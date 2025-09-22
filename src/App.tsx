@@ -9,6 +9,7 @@ import Payment from "./pages/Payment";
 import TestAccess from "./pages/TestAccess";
 import Test from "./pages/Test";
 import Admin from "./pages/Admin";
+import SetupAdmin from "./pages/SetupAdmin";
 import Results from "./pages/Results";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -32,6 +33,11 @@ const App = () => (
           <Route path="/admin" element={
             <ProtectedRoute>
               <Admin />
+            </ProtectedRoute>
+          } />
+          <Route path="/setup-admin" element={
+            <ProtectedRoute>
+              <SetupAdmin />
             </ProtectedRoute>
           } />
           <Route path="/results" element={<Results />} />

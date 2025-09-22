@@ -9,6 +9,7 @@ import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileT
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { checkAdminStatus } from "@/lib/adminHelper";
 
 type Registration = {
   id: string
@@ -52,9 +53,24 @@ const Admin = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    const checkAdmin = async () => {
+      const adminStatus = await checkAdminStatus();
+      setIsAdmin(adminStatus);
+      if (adminStatus) {
+        fetchData();
+      } else {
+        setLoading(false);
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges",
+          variant: "destructive"
+        });
+      }
+    };
+    checkAdmin();
   }, []);
 
   const fetchData = async () => {
@@ -173,6 +189,20 @@ const Admin = () => {
       minimumFractionDigits: 0
     }).format(amount);
   };
+
+  if (!isAdmin && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-4">Access Denied</h1>
+          <p className="text-muted-foreground mb-4">You don't have admin privileges to access this page.</p>
+          <Button asChild>
+            <Link to="/">Return Home</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
