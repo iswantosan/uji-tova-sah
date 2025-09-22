@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,81 +7,108 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase, type Registration, type Payment, type TestResult } from "@/lib/supabase";
 
 const Admin = () => {
   const { toast } = useToast();
-  
-  // Mock data - in real app, this would come from Supabase
-  const [registrations] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@email.com",
-      phone: "081234567890",
-      age: 25,
-      date: "2024-01-15",
-      status: "pending"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@email.com",
-      phone: "081234567891",
-      age: 30,
-      date: "2024-01-14",
-      status: "approved"
-    }
-  ]);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [payments] = useState([
-    {
-      id: 1,
-      email: "john@email.com",
-      paymentCode: "TOVA-ABC123",
-      amount: 350000,
-      date: "2024-01-15",
-      status: "pending",
-      proof: "bukti_transfer_john.jpg"
-    },
-    {
-      id: 2,
-      email: "jane@email.com",
-      paymentCode: "TOVA-XYZ789",
-      amount: 350000,
-      date: "2024-01-14",
-      status: "approved",
-      proof: "bukti_transfer_jane.jpg"
-    }
-  ]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const [testResults] = useState([
-    {
-      id: 1,
-      email: "jane@email.com",
-      paymentCode: "TOVA-XYZ789",
-      testDate: "2024-01-14",
-      duration: "21:00",
-      omissionErrors: 12,
-      commissionErrors: 8,
-      responseTime: 456,
-      variability: 89,
-      status: "completed"
-    }
-  ]);
+  const fetchData = async () => {
+    try {
+      // Fetch registrations
+      const { data: regData, error: regError } = await supabase
+        .from('registrations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const handleApprovePayment = (paymentId: number) => {
-    toast({
-      title: "Pembayaran Disetujui",
-      description: "Peserta sekarang dapat mengakses tes TOVA",
-    });
+      if (regError) throw regError;
+      setRegistrations(regData || []);
+
+      // Fetch payments
+      const { data: payData, error: payError } = await supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (payError) throw payError;
+      setPayments(payData || []);
+
+      // Fetch test results
+      const { data: testData, error: testError } = await supabase
+        .from('test_results')
+        .select('*')
+        .order('test_date', { ascending: false });
+
+      if (testError) throw testError;
+      setTestResults(testData || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Gagal mengambil data dari database",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRejectPayment = (paymentId: number) => {
-    toast({
-      title: "Pembayaran Ditolak",
-      description: "Peserta akan diberitahu untuk mengirim ulang bukti pembayaran",
-      variant: "destructive"
-    });
+  const handleApprovePayment = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payments')
+        .update({ status: 'approved' })
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Pembayaran Disetujui",
+        description: "Peserta sekarang dapat mengakses tes TOVA",
+      });
+
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error('Error approving payment:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menyetujui pembayaran",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRejectPayment = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payments')
+        .update({ status: 'rejected' })
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Pembayaran Ditolak",
+        description: "Peserta akan diberitahu untuk mengirim ulang bukti pembayaran",
+        variant: "destructive"
+      });
+
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error('Error rejecting payment:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menolak pembayaran",
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -224,7 +251,7 @@ const Admin = () => {
                         <TableCell>{reg.email}</TableCell>
                         <TableCell>{reg.phone}</TableCell>
                         <TableCell>{reg.age}</TableCell>
-                        <TableCell>{reg.date}</TableCell>
+                        <TableCell>{new Date(reg.created_at).toLocaleDateString('id-ID')}</TableCell>
                         <TableCell>{getStatusBadge(reg.status)}</TableCell>
                       </TableRow>
                     ))}
@@ -259,9 +286,9 @@ const Admin = () => {
                     {payments.map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell>{payment.email}</TableCell>
-                        <TableCell className="font-mono">{payment.paymentCode}</TableCell>
+                        <TableCell className="font-mono">{payment.payment_code}</TableCell>
                         <TableCell>{formatCurrency(payment.amount)}</TableCell>
-                        <TableCell>{payment.date}</TableCell>
+                        <TableCell>{new Date(payment.created_at).toLocaleDateString('id-ID')}</TableCell>
                         <TableCell>{getStatusBadge(payment.status)}</TableCell>
                         <TableCell>
                           {payment.status === 'pending' && (
@@ -319,12 +346,12 @@ const Admin = () => {
                     {testResults.map((result) => (
                       <TableRow key={result.id}>
                         <TableCell>{result.email}</TableCell>
-                        <TableCell className="font-mono">{result.paymentCode}</TableCell>
-                        <TableCell>{result.testDate}</TableCell>
+                        <TableCell className="font-mono">{result.payment_code}</TableCell>
+                        <TableCell>{new Date(result.test_date).toLocaleDateString('id-ID')}</TableCell>
                         <TableCell>{result.duration}</TableCell>
-                        <TableCell>{result.omissionErrors}</TableCell>
-                        <TableCell>{result.commissionErrors}</TableCell>
-                        <TableCell>{result.responseTime}</TableCell>
+                        <TableCell>{result.omission_errors}</TableCell>
+                        <TableCell>{result.commission_errors}</TableCell>
+                        <TableCell>{result.response_time}</TableCell>
                         <TableCell>{result.variability}</TableCell>
                         <TableCell>{getStatusBadge(result.status)}</TableCell>
                       </TableRow>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Brain, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,17 +17,72 @@ const Register = () => {
     age: "",
     purpose: ""
   });
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In real app, this would connect to Supabase
-    toast({
-      title: "Registrasi Berhasil!",
-      description: "Silakan lanjut ke pembayaran untuk mendapatkan kode akses tes.",
-    });
-    // Navigate to payment page
-    window.location.href = "/payment";
+    
+    if (!formData.name || !formData.email || !formData.phone || !formData.age) {
+      toast({
+        title: "Error",
+        description: "Harap lengkapi semua field yang wajib",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (parseInt(formData.age) < 6 || parseInt(formData.age) > 65) {
+      toast({
+        title: "Error", 
+        description: "Usia harus antara 6-65 tahun",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('registrations')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          age: parseInt(formData.age)
+        });
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Error",
+            description: "Email sudah terdaftar",
+            variant: "destructive"
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast({
+        title: "Registrasi Berhasil!",
+        description: "Silakan lanjut ke pembayaran untuk mendapatkan kode akses tes.",
+      });
+      
+      navigate("/payment");
+    } catch (error) {
+      console.error('Error registering:', error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat registrasi. Silakan coba lagi.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,8 +208,8 @@ const Register = () => {
                   </ul>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg">
-                  Lanjut ke Pembayaran
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                  {isLoading ? "Mendaftar..." : "Lanjut ke Pembayaran"}
                 </Button>
               </form>
             </CardContent>

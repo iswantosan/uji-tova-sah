@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Brain, ArrowLeft, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const TestAccess = () => {
   const [formData, setFormData] = useState({
@@ -18,28 +19,59 @@ const TestAccess = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
-    // Simulate verification process
-    setTimeout(() => {
-      // In real app, this would verify with Supabase
-      const isApproved = Math.random() > 0.3; // 70% chance of approval for demo
-      
-      if (isApproved) {
+    if (!formData.email || !formData.paymentCode) {
+      toast({
+        title: "Error",
+        description: "Harap lengkapi email dan kode pembayaran",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Check if payment exists and is approved
+      const { data: payment, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('email', formData.email)
+        .eq('payment_code', formData.paymentCode)
+        .eq('status', 'approved')
+        .single();
+
+      if (error || !payment) {
         toast({
-          title: "Akses Disetujui!",
-          description: "Pembayaran Anda telah diverifikasi. Selamat mengerjakan tes!",
-        });
-        window.location.href = "/test";
-      } else {
-        toast({
-          title: "Pembayaran Belum Diverifikasi",
-          description: "Silakan tunggu hingga admin memverifikasi pembayaran Anda.",
+          title: "Akses Ditolak",
+          description: "Email atau kode pembayaran tidak valid, atau pembayaran belum disetujui admin",
           variant: "destructive"
         });
+        return;
       }
+
+      // Store payment info for test session
+      localStorage.setItem('tova_session', JSON.stringify({
+        email: payment.email,
+        paymentCode: payment.payment_code,
+        paymentId: payment.id
+      }));
+
+      toast({
+        title: "Akses Disetujui!",
+        description: "Pembayaran Anda telah diverifikasi. Selamat mengerjakan tes!",
+      });
+      window.location.href = "/test";
+    } catch (error) {
+      console.error('Error verifying access:', error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan. Silakan coba lagi.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

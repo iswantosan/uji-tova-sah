@@ -1,14 +1,85 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Brain, ArrowLeft, Copy, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Payment = () => {
-  const [paymentCode] = useState(() => `TOVA-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
+  const [email, setEmail] = useState("");
+  const [paymentCode, setPaymentCode] = useState("");
+  const [showPaymentCode, setShowPaymentCode] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const generatePaymentCode = async () => {
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Masukkan email terlebih dahulu",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Check if email is registered
+      const { data: registration, error: regError } = await supabase
+        .from('registrations')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (regError || !registration) {
+        toast({
+          title: "Error",
+          description: "Email tidak terdaftar. Silakan registrasi terlebih dahulu.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Generate unique payment code
+      const code = `TOVA-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
+      // Insert payment record
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          registration_id: registration.id,
+          email: email,
+          payment_code: code,
+          amount: 350000
+        });
+
+      if (paymentError) {
+        throw paymentError;
+      }
+
+      setPaymentCode(code);
+      setShowPaymentCode(true);
+      
+      toast({
+        title: "Kode Pembayaran Dibuat!",
+        description: "Silakan lakukan pembayaran dan simpan bukti transfer",
+      });
+    } catch (error) {
+      console.error('Error generating payment code:', error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan. Silakan coba lagi.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -44,42 +115,83 @@ const Payment = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Registrasi Berhasil!
+              Generate Kode Pembayaran
             </h2>
             <p className="text-lg text-gray-600">
-              Silakan lakukan pembayaran untuk mendapatkan akses tes
+              Masukkan email Anda untuk mendapatkan kode pembayaran
             </p>
           </div>
 
-          <Card className="shadow-lg mb-6">
-            <CardHeader>
-              <CardTitle>Kode Pembayaran Anda</CardTitle>
-              <CardDescription>
-                Gunakan kode ini untuk melakukan pembayaran
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-6 rounded-lg text-center">
-                <div className="text-2xl font-mono font-bold text-primary mb-4">
-                  {paymentCode}
+          {!showPaymentCode ? (
+            <Card className="shadow-lg mb-6">
+              <CardHeader>
+                <CardTitle>Email Terdaftar</CardTitle>
+                <CardDescription>
+                  Masukkan email yang sama dengan saat registrasi
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="contoh@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    onClick={generatePaymentCode}
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Membuat Kode..." : "Generate Kode Pembayaran"}
+                  </Button>
                 </div>
-                <Button 
-                  onClick={() => copyToClipboard(paymentCode)}
-                  variant="outline"
-                  className="flex items-center space-x-2"
-                >
-                  {copied ? (
-                    <CheckCircle className="h-4 w-4 text-success" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                  <span>{copied ? "Disalin!" : "Salin Kode"}</span>
-                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <div className="text-center mb-6">
+                <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  Kode Pembayaran Berhasil Dibuat!
+                </h3>
               </div>
-            </CardContent>
-          </Card>
+
+              <Card className="shadow-lg mb-6">
+                <CardHeader>
+                  <CardTitle>Kode Pembayaran Anda</CardTitle>
+                  <CardDescription>
+                    Gunakan kode ini untuk melakukan pembayaran
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-gray-50 p-6 rounded-lg text-center">
+                    <div className="text-2xl font-mono font-bold text-primary mb-4">
+                      {paymentCode}
+                    </div>
+                    <Button 
+                      onClick={() => copyToClipboard(paymentCode)}
+                      variant="outline"
+                      className="flex items-center space-x-2"
+                    >
+                      {copied ? (
+                        <CheckCircle className="h-4 w-4 text-success" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      <span>{copied ? "Disalin!" : "Salin Kode"}</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
 
           <Card className="shadow-lg mb-6">
             <CardHeader>
