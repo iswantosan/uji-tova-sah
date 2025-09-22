@@ -11,8 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const TestAccess = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    paymentCode: ""
+    email: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -20,31 +19,24 @@ const TestAccess = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.paymentCode) {
+    if (!formData.email) {
       toast({
         title: "Error",
-        description: "Harap lengkapi email dan kode pembayaran",
+        description: "Harap masukkan email",
         variant: "destructive"
       });
       return;
     }
 
-
     setIsLoading(true);
 
     try {
-      console.log('Checking payment with:', { email: formData.email, code: formData.paymentCode });
-      
-      // Check if payment exists and is approved
-      const { data: payment, error } = await supabase
-        .from('payments')
+      // Check if registration exists
+      const { data: registration, error } = await supabase
+        .from('registrations')
         .select('*')
         .eq('email', formData.email)
-        .eq('payment_code', formData.paymentCode)
-        .eq('status', 'approved')
         .maybeSingle();
-
-      console.log('Payment query result:', { payment, error });
 
       if (error) {
         console.error('Database error:', error);
@@ -56,25 +48,24 @@ const TestAccess = () => {
         return;
       }
 
-      if (!payment) {
+      if (!registration) {
         toast({
-          title: "Akses Ditolak",
-          description: "Email atau kode pembayaran tidak valid, atau pembayaran belum disetujui admin",
+          title: "Email Tidak Ditemukan",
+          description: "Email belum terdaftar. Silakan daftar terlebih dahulu.",
           variant: "destructive"
         });
         return;
       }
 
-      // Store payment info for test session
+      // Store session for test access
       localStorage.setItem('tova_session', JSON.stringify({
-        email: payment.email,
-        paymentCode: payment.payment_code,
-        paymentId: payment.id
+        email: registration.email,
+        name: registration.name
       }));
 
       toast({
         title: "Akses Disetujui!",
-        description: "Pembayaran Anda telah diverifikasi. Selamat mengerjakan tes!",
+        description: "Selamat mengerjakan tes TOVA!",
       });
       window.location.href = "/test";
     } catch (error) {
@@ -125,7 +116,7 @@ const TestAccess = () => {
               Akses Tes TOVA
             </h2>
             <p className="text-lg text-gray-600">
-              Masukkan email dan kode pembayaran untuk memulai tes
+              Masukkan email terdaftar untuk memulai tes
             </p>
           </div>
 
@@ -133,7 +124,7 @@ const TestAccess = () => {
             <CardHeader>
               <CardTitle>Verifikasi Akses</CardTitle>
               <CardDescription>
-                Pastikan Anda telah melakukan pembayaran sebelum mengakses tes
+                Masukkan email yang sudah terdaftar untuk mengakses tes
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -151,24 +142,9 @@ const TestAccess = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="paymentCode">Kode Pembayaran *</Label>
-                  <Input
-                    id="paymentCode"
-                    name="paymentCode"
-                    type="text"
-                    placeholder="TOVA-XXXXXX"
-                    value={formData.paymentCode}
-                    onChange={handleInputChange}
-                    className="font-mono"
-                    required
-                  />
-                </div>
-
                 <Alert>
                   <AlertDescription>
-                    Jika pembayaran Anda belum diverifikasi, sistem akan menampilkan pesan error. 
-                    Proses verifikasi pembayaran membutuhkan waktu 1-24 jam kerja.
+                    Pastikan email yang dimasukkan sama dengan saat registrasi.
                   </AlertDescription>
                 </Alert>
 
@@ -184,7 +160,7 @@ const TestAccess = () => {
 
               <div className="mt-6 pt-6 border-t text-center">
                 <p className="text-sm text-gray-600 mb-4">
-                  Belum memiliki kode pembayaran?
+                  Belum terdaftar?
                 </p>
                 <Button variant="outline" asChild>
                   <Link to="/register">Daftar Sekarang</Link>
@@ -199,7 +175,6 @@ const TestAccess = () => {
                 <h4 className="font-semibold text-blue-900 mb-2">Bantuan:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Pastikan email yang dimasukkan sama dengan saat registrasi</li>
-                  <li>• Kode pembayaran dapat ditemukan di halaman pembayaran</li>
                   <li>• Hubungi admin jika mengalami kesulitan akses</li>
                 </ul>
               </CardContent>
