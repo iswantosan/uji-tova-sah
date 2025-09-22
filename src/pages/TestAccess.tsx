@@ -33,16 +33,30 @@ const TestAccess = () => {
     setIsLoading(true);
 
     try {
+      console.log('Checking payment with:', { email: formData.email, code: formData.paymentCode });
+      
       // Check if payment exists and is approved
-      const { data: payment, error } = await (supabase as any)
+      const { data: payment, error } = await supabase
         .from('payments')
         .select('*')
         .eq('email', formData.email)
         .eq('payment_code', formData.paymentCode)
         .eq('status', 'approved')
-        .single();
+        .maybeSingle();
 
-      if (error || !payment) {
+      console.log('Payment query result:', { payment, error });
+
+      if (error) {
+        console.error('Database error:', error);
+        toast({
+          title: "Error Database",
+          description: `Database error: ${error.message}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!payment) {
         toast({
           title: "Akses Ditolak",
           description: "Email atau kode pembayaran tidak valid, atau pembayaran belum disetujui admin",
