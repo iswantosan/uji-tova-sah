@@ -29,13 +29,13 @@ const Test = () => {
     }
   }, [testPhase, timeLeft]);
 
-  // Target presentation logic
+  // Target presentation logic - TOVA Standard
   useEffect(() => {
     if (testPhase === 'test') {
-      // Hide instructions after 3 seconds
+      // Hide instructions after 5 seconds
       setTimeout(() => {
         setShowInstructions(false);
-      }, 3000);
+      }, 5000);
 
       const interval = setInterval(() => {
         if (currentTrial >= totalTrials) {
@@ -49,12 +49,12 @@ const Test = () => {
         setShowStimulus(true);
         setCurrentTrial(prev => prev + 1);
         
-        // Hide stimulus after 100ms
+        // Hide stimulus after 100ms (TOVA standard)
         setTimeout(() => {
           setShowStimulus(false);
         }, 100);
         
-      }, 2000); // 2-second inter-stimulus interval
+      }, 2000); // 2-second inter-stimulus interval (TOVA standard)
       
       return () => clearInterval(interval);
     }
@@ -118,7 +118,7 @@ const Test = () => {
             
             <Card className="bg-gray-800 border-gray-700 text-left">
               <CardHeader>
-                <CardTitle className="text-white">Cara Mengerjakan Tes:</CardTitle>
+                <CardTitle className="text-white">Cara Mengerjakan Tes TOVA:</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
                 <div className="space-y-2">
@@ -144,11 +144,12 @@ const Test = () => {
                 <div className="bg-blue-900 p-4 rounded">
                   <h4 className="font-semibold mb-2">Aturan Penting:</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Durasi tes: 21 menit</li>
-                    <li>• Respon hanya dengan menekan SPASI</li>
-                    <li>• Tetap fokus pada layar</li>
-                    <li>• Respon secepatnya untuk target</li>
-                    <li>• Jangan tekan untuk non-target</li>
+                    <li>• Durasi tes: 21 menit (320 stimulus)</li>
+                    <li>• Stimulus muncul 0.1 detik, interval 2 detik</li>
+                    <li>• Respon hanya dengan menekan SPASI untuk target</li>
+                    <li>• Tetap fokus pada layar sepanjang tes</li>
+                    <li>• Respon secepatnya saat melihat target</li>
+                    <li>• Ini adalah tes konsentrasi yang menantang</li>
                   </ul>
                 </div>
               </CardContent>
