@@ -10,7 +10,6 @@ import { Brain, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -39,34 +38,17 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth`
-          }
-        });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        toast({
-          title: "Registrasi berhasil!",
-          description: "Silakan cek email untuk verifikasi akun.",
-        });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        toast({
-          title: "Login berhasil!",
-          description: "Selamat datang di dashboard admin.",
-        });
-      }
+      toast({
+        title: "Login berhasil!",
+        description: "Selamat datang di dashboard admin.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -96,12 +78,9 @@ const Auth = () => {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle>{isSignUp ? "Buat Akun Admin" : "Login Admin"}</CardTitle>
+            <CardTitle>Login Admin</CardTitle>
             <CardDescription>
-              {isSignUp 
-                ? "Buat akun admin baru untuk mengakses dashboard" 
-                : "Masuk ke dashboard admin"
-              }
+              Masuk ke dashboard admin
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -111,7 +90,7 @@ const Auth = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@example.com"
+                  placeholder="admin@admin.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -130,22 +109,9 @@ const Auth = () => {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "..." : (isSignUp ? "Daftar" : "Masuk")}
+                {isLoading ? "Masuk..." : "Masuk"}
               </Button>
             </form>
-
-            <div className="mt-4 text-center">
-              <Button
-                variant="link"
-                onClick={() => setIsSignUp(!isSignUp)}
-                className="text-sm"
-              >
-                {isSignUp 
-                  ? "Sudah punya akun? Masuk di sini" 
-                  : "Belum punya akun? Daftar di sini"
-                }
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
