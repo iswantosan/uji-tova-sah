@@ -5,12 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText } from "lucide-react";
+import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase, type Registration, type Payment, type TestResult } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 
 const Admin = () => {
   const { toast } = useToast();
+  const { signOut } = useAuth();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
@@ -172,12 +174,18 @@ const Admin = () => {
               <Brain className="h-8 w-8 text-primary" />
               <h1 className="text-2xl font-bold text-primary">TOVA Test - Admin</h1>
             </div>
-            <Button variant="outline" asChild>
-              <Link to="/" className="flex items-center space-x-2">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Kembali</span>
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/" className="flex items-center space-x-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Kembali</span>
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>

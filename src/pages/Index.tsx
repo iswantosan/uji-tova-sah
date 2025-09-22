@@ -18,6 +18,9 @@ const Index = () => {
               <Button asChild>
                 <Link to="/register">Daftar Sekarang</Link>
               </Button>
+              <Button variant="outline" asChild>
+                <Link to="/auth">Login Admin</Link>
+              </Button>
             </div>
           </div>
         </div>
