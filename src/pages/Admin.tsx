@@ -21,6 +21,16 @@ const Admin = () => {
   }, []);
 
   const fetchData = async () => {
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Supabase tidak tersedia. Silakan periksa konfigurasi.",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       // Fetch registrations
       const { data: regData, error: regError } = await supabase
@@ -61,6 +71,15 @@ const Admin = () => {
   };
 
   const handleApprovePayment = async (paymentId: string) => {
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Supabase tidak tersedia",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('payments')
@@ -86,6 +105,15 @@ const Admin = () => {
   };
 
   const handleRejectPayment = async (paymentId: string) => {
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Supabase tidak tersedia",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('payments')

@@ -42,6 +42,15 @@ const Register = () => {
       return;
     }
 
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Supabase tidak tersedia. Silakan periksa konfigurasi.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
