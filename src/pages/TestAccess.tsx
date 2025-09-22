@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Brain, ArrowLeft, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const TestAccess = () => {
   const [formData, setFormData] = useState({
@@ -29,20 +29,12 @@ const TestAccess = () => {
       return;
     }
 
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Supabase tidak tersedia. Silakan periksa konfigurasi.",
-        variant: "destructive"
-      });
-      return;
-    }
 
     setIsLoading(true);
 
     try {
       // Check if payment exists and is approved
-      const { data: payment, error } = await supabase
+      const { data: payment, error } = await (supabase as any)
         .from('payments')
         .select('*')
         .eq('email', formData.email)

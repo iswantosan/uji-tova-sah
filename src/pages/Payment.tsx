@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Brain, ArrowLeft, Copy, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const Payment = () => {
   const [email, setEmail] = useState("");
@@ -26,20 +26,12 @@ const Payment = () => {
       return;
     }
 
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Supabase tidak tersedia. Silakan periksa konfigurasi.",
-        variant: "destructive"
-      });
-      return;
-    }
 
     setIsLoading(true);
 
     try {
       // Check if email is registered
-      const { data: registration, error: regError } = await supabase
+      const { data: registration, error: regError } = await (supabase as any)
         .from('registrations')
         .select('*')
         .eq('email', email)
@@ -58,7 +50,7 @@ const Payment = () => {
       const code = `TOVA-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       
       // Insert payment record
-      const { error: paymentError } = await supabase
+      const { error: paymentError } = await (supabase as any)
         .from('payments')
         .insert({
           registration_id: registration.id,
