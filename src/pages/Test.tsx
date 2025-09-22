@@ -11,8 +11,10 @@ const Test = () => {
   const [timeLeft, setTimeLeft] = useState(21 * 60); // 21 minutes in seconds
   const [currentTrial, setCurrentTrial] = useState(0);
   const [totalTrials] = useState(320);
-  const [showTarget, setShowTarget] = useState(false);
+  const [showStimulus, setShowStimulus] = useState(false);
+  const [isTarget, setIsTarget] = useState(false);
   const [responses, setResponses] = useState<number[]>([]);
+  const [showInstructions, setShowInstructions] = useState(true);
   const { toast } = useToast();
 
   // Timer for test duration
@@ -30,21 +32,33 @@ const Test = () => {
   // Target presentation logic
   useEffect(() => {
     if (testPhase === 'test') {
+      // Hide instructions after 3 seconds
+      setTimeout(() => {
+        setShowInstructions(false);
+      }, 3000);
+
       const interval = setInterval(() => {
-        const isTarget = Math.random() < 0.22; // 22% target frequency
-        setShowTarget(isTarget);
+        if (currentTrial >= totalTrials) {
+          setTestPhase('completed');
+          return;
+        }
+
+        // Determine if this trial is a target (22% probability)
+        const isTargetTrial = Math.random() < 0.22;
+        setIsTarget(isTargetTrial);
+        setShowStimulus(true);
         setCurrentTrial(prev => prev + 1);
         
-        // Auto-advance after stimulus duration
+        // Hide stimulus after 100ms
         setTimeout(() => {
-          setShowTarget(false);
+          setShowStimulus(false);
         }, 100);
         
       }, 2000); // 2-second inter-stimulus interval
       
       return () => clearInterval(interval);
     }
-  }, [testPhase]);
+  }, [testPhase, currentTrial, totalTrials]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -175,19 +189,23 @@ const Test = () => {
         {/* Test Area */}
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            {showTarget ? (
+            {showStimulus ? (
               <div className="w-24 h-24 border-8 border-white mx-auto mb-8 relative">
-                <div className="w-full h-6 bg-white absolute top-0"></div>
+                {isTarget ? (
+                  <div className="w-full h-6 bg-white absolute top-0"></div>
+                ) : (
+                  <div className="w-full h-6 bg-white absolute bottom-0"></div>
+                )}
               </div>
             ) : (
-              <div className="w-24 h-24 border-8 border-white mx-auto mb-8 relative">
-                <div className="w-full h-6 bg-white absolute bottom-0"></div>
-              </div>
+              <div className="w-24 h-24 mx-auto mb-8"></div>
             )}
             
-            <p className="text-gray-400 text-sm">
-              Tekan SPASI untuk target (garis di atas)
-            </p>
+            {showInstructions && (
+              <p className="text-gray-400 text-sm">
+                Tekan SPASI untuk target (garis di atas)
+              </p>
+            )}
           </div>
         </div>
 
