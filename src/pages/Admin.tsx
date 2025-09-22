@@ -7,8 +7,43 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase, type Registration, type Payment, type TestResult } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+type Registration = {
+  id: string
+  name: string
+  email: string
+  phone: string
+  age: number
+  created_at: string
+  status: 'pending' | 'approved' | 'rejected'
+}
+
+type Payment = {
+  id: string
+  registration_id: string
+  email: string
+  payment_code: string
+  amount: number
+  proof_url?: string
+  created_at: string
+  status: 'pending' | 'approved' | 'rejected'
+}
+
+type TestResult = {
+  id: string
+  payment_id: string
+  email: string
+  payment_code: string
+  test_date: string
+  duration: string
+  omission_errors: number
+  commission_errors: number
+  response_time: number
+  variability: number
+  status: 'in_progress' | 'completed'
+}
 
 const Admin = () => {
   const { toast } = useToast();
@@ -23,15 +58,6 @@ const Admin = () => {
   }, []);
 
   const fetchData = async () => {
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Supabase tidak tersedia. Silakan periksa konfigurasi.",
-        variant: "destructive"
-      });
-      setLoading(false);
-      return;
-    }
 
     try {
       // Fetch registrations
@@ -73,14 +99,6 @@ const Admin = () => {
   };
 
   const handleApprovePayment = async (paymentId: string) => {
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Supabase tidak tersedia",
-        variant: "destructive"
-      });
-      return;
-    }
 
     try {
       const { error } = await supabase
@@ -107,14 +125,6 @@ const Admin = () => {
   };
 
   const handleRejectPayment = async (paymentId: string) => {
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Supabase tidak tersedia",
-        variant: "destructive"
-      });
-      return;
-    }
 
     try {
       const { error } = await supabase
