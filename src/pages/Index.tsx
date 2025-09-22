@@ -15,9 +15,6 @@ const Index = () => {
               <h1 className="text-2xl font-bold text-primary">TOVA Test</h1>
             </div>
             <div className="space-x-4">
-              <Button variant="outline" asChild>
-                <Link to="/admin">Admin</Link>
-              </Button>
               <Button asChild>
                 <Link to="/register">Daftar Sekarang</Link>
               </Button>
