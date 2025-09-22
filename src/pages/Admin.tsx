@@ -61,7 +61,7 @@ const Admin = () => {
 
     try {
       // Fetch registrations
-      const { data: regData, error: regError } = await supabase
+      const { data: regData, error: regError } = await (supabase as any)
         .from('registrations')
         .select('*')
         .order('created_at', { ascending: false });
@@ -70,7 +70,7 @@ const Admin = () => {
       setRegistrations(regData || []);
 
       // Fetch payments
-      const { data: payData, error: payError } = await supabase
+      const { data: payData, error: payError } = await (supabase as any)
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false });
@@ -79,7 +79,7 @@ const Admin = () => {
       setPayments(payData || []);
 
       // Fetch test results
-      const { data: testData, error: testError } = await supabase
+      const { data: testData, error: testError } = await (supabase as any)
         .from('test_results')
         .select('*')
         .order('test_date', { ascending: false });
@@ -101,7 +101,7 @@ const Admin = () => {
   const handleApprovePayment = async (paymentId: string) => {
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('payments')
         .update({ status: 'approved' })
         .eq('id', paymentId);
@@ -127,7 +127,7 @@ const Admin = () => {
   const handleRejectPayment = async (paymentId: string) => {
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('payments')
         .update({ status: 'rejected' })
         .eq('id', paymentId);

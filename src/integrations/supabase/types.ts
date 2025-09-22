@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          email: string
+          id: string
+          payment_code: string
+          proof_url: string | null
+          registration_id: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          email: string
+          id?: string
+          payment_code: string
+          proof_url?: string | null
+          registration_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          email?: string
+          id?: string
+          payment_code?: string
+          proof_url?: string | null
+          registration_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registrations: {
+        Row: {
+          age: number
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          age: number
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone: string
+          status?: string
+        }
+        Update: {
+          age?: number
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           deleted: boolean
@@ -43,6 +114,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      test_results: {
+        Row: {
+          commission_errors: number
+          duration: string
+          email: string
+          id: string
+          omission_errors: number
+          payment_code: string
+          payment_id: string | null
+          response_time: number
+          status: string
+          test_date: string
+          variability: number
+        }
+        Insert: {
+          commission_errors?: number
+          duration: string
+          email: string
+          id?: string
+          omission_errors?: number
+          payment_code: string
+          payment_id?: string | null
+          response_time?: number
+          status?: string
+          test_date?: string
+          variability?: number
+        }
+        Update: {
+          commission_errors?: number
+          duration?: string
+          email?: string
+          id?: string
+          omission_errors?: number
+          payment_code?: string
+          payment_id?: string | null
+          response_time?: number
+          status?: string
+          test_date?: string
+          variability?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_results_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
