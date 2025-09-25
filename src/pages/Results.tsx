@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Brain, ArrowLeft, Download, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { Brain, ArrowLeft, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -136,18 +136,12 @@ const Results = () => {
               <Brain className="h-8 w-8 text-primary" />
               <h1 className="text-2xl font-bold text-primary">Hasil Tes TOVA</h1>
             </div>
-            <div className="space-x-4">
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Unduh PDF
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/" className="flex items-center space-x-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Beranda</span>
-                </Link>
-              </Button>
-            </div>
+            <Button variant="outline" asChild>
+              <Link to="/" className="flex items-center space-x-2">
+                <ArrowLeft className="h-4 w-4" />
+                <span>Beranda</span>
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
@@ -318,11 +312,7 @@ const Results = () => {
           </Card>
 
           {/* Actions */}
-          <div className="flex justify-center space-x-4">
-            <Button size="lg">
-              <Download className="h-4 w-4 mr-2" />
-              Unduh Laporan Lengkap
-            </Button>
+          <div className="flex justify-center">
             <Button variant="outline" size="lg" asChild>
               <Link to="/">Kembali ke Beranda</Link>
             </Button>
