@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Brain, Clock, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Test = () => {
-  const [testPhase, setTestPhase] = useState<'instructions' | 'practice' | 'test' | 'completed'>('instructions');
+  const [testPhase, setTestPhase] = useState<'verification' | 'instructions' | 'practice' | 'test' | 'completed'>('verification');
+  const [paymentCode, setPaymentCode] = useState("");
   const [timeLeft, setTimeLeft] = useState(21 * 60); // 21 minutes in seconds
   const [currentTrial, setCurrentTrial] = useState(0);
   const [totalTrials] = useState(320);
@@ -15,6 +17,7 @@ const Test = () => {
   const [isTarget, setIsTarget] = useState(false);
   const [responses, setResponses] = useState<number[]>([]);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   // Timer for test duration
@@ -88,6 +91,54 @@ const Test = () => {
     }
   }, [testPhase]);
 
+  const verifyPaymentCode = async () => {
+    if (!paymentCode) {
+      toast({
+        title: "Error",
+        description: "Masukkan kode pembayaran",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Check if payment code exists and is approved
+      const { data: payment, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('payment_code', paymentCode)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      if (error || !payment) {
+        toast({
+          title: "Kode Tidak Valid",
+          description: "Kode pembayaran tidak ditemukan atau belum disetujui admin.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Verifikasi Berhasil!",
+        description: "Kode pembayaran valid. Anda dapat memulai tes.",
+      });
+      
+      setTestPhase('instructions');
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat verifikasi.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const startTest = () => {
     setTestPhase('test');
     toast({
@@ -107,6 +158,51 @@ const Test = () => {
       window.location.href = "/results";
     }, 2000);
   };
+
+  if (testPhase === 'verification') {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-lg mx-auto text-center">
+            <Brain className="h-16 w-16 text-primary mx-auto mb-6" />
+            <h1 className="text-3xl font-bold mb-6">Verifikasi Kode Pembayaran</h1>
+            
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Masukkan Kode Pembayaran</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Kode pembayaran yang sudah disetujui admin
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="TOVA-XXXXXX"
+                    value={paymentCode}
+                    onChange={(e) => setPaymentCode(e.target.value.toUpperCase())}
+                    className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:border-primary"
+                  />
+                </div>
+                
+                <Button 
+                  onClick={verifyPaymentCode}
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Memverifikasi..." : "Verifikasi & Mulai Tes"}
+                </Button>
+                
+                <Button variant="outline" asChild className="w-full">
+                  <Link to="/test-access">Kembali</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (testPhase === 'instructions') {
     return (

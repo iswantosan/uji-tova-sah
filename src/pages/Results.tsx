@@ -1,34 +1,118 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Brain, ArrowLeft, Download, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Results = () => {
-  // Mock test results - in real app, this would come from Supabase
-  const testResults = {
-    participantInfo: {
-      name: "John Doe",
-      email: "john@email.com",
-      testDate: "15 Januari 2024",
-      duration: "21:00"
-    },
-    performance: {
-      omissionErrors: 12,
-      commissionErrors: 8,
-      responseTime: 456,
-      responseTimeVariability: 89,
-      attentiveness: 78,
-      impulsivity: 85,
-      consistency: 72
-    },
-    interpretation: {
-      overall: "Normal",
-      attention: "Sedikit di bawah rata-rata",
-      impulseControl: "Normal",
-      consistency: "Perlu perbaikan"
-    }
-  };
+  const [testResults, setTestResults] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        // Get session info
+        const sessionData = localStorage.getItem('tova_session');
+        if (!sessionData) {
+          toast({
+            title: "Error",
+            description: "Session tidak ditemukan. Silakan login kembali.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        const session = JSON.parse(sessionData);
+        
+        // Fetch test results based on email from session
+        const { data, error } = await supabase
+          .from('test_results')
+          .select('*')
+          .eq('email', session.email)
+          .order('test_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching results:', error);
+          toast({
+            title: "Error",
+            description: "Gagal mengambil hasil tes.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        if (!data) {
+          toast({
+            title: "Tidak Ada Data",
+            description: "Belum ada hasil tes untuk email ini.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        setTestResults({
+          participantInfo: {
+            name: session.name,
+            email: session.email,
+            testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
+            duration: data.duration
+          },
+          performance: {
+            omissionErrors: data.omission_errors,
+            commissionErrors: data.commission_errors,
+            responseTime: Math.round(data.response_time),
+            responseTimeVariability: Math.round(data.variability),
+            attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
+            impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
+            consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10)))
+          }
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Terjadi kesalahan saat mengambil data.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [toast]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-16 w-16 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-lg">Memuat hasil tes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!testResults) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <Brain className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-bold mb-2">Hasil Tes Tidak Ditemukan</h2>
+          <p className="text-gray-600 mb-4">Belum ada hasil tes untuk akun ini.</p>
+          <Button asChild>
+            <Link to="/">Kembali ke Beranda</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const getPerformanceColor = (score: number) => {
     if (score >= 80) return "text-success";
