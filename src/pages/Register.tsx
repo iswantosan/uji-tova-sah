@@ -76,7 +76,8 @@ const Register = () => {
 
       toast({
         title: "Registrasi Berhasil!",
-        description: "Silakan lanjutkan ke pembayaran untuk mengakses tes.",
+        description: "Kami akan memverifikasi registrasi Anda. Silakan lanjutkan ke pembayaran.",
+        duration: 4000
       });
 
       // Redirect to payment
@@ -209,11 +210,12 @@ const Register = () => {
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Informasi Penting:</h4>
+                  <h4 className="font-semibold text-blue-900 mb-2">Proses Registrasi:</h4>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Durasi tes: Sekitar 21 menit</li>
-                    <li>• Hasil tersedia langsung setelah tes selesai</li>
-                    <li>• Tes dapat dilakukan setelah registrasi</li>
+                    <li>1. Lengkapi formulir registrasi</li>
+                    <li>2. Kami akan memverifikasi data Anda</li>
+                    <li>3. Lakukan pembayaran sesuai instruksi</li>
+                    <li>4. Tunggu persetujuan admin untuk mulai tes</li>
                   </ul>
                 </div>
 
