@@ -217,7 +217,7 @@ const Test = () => {
             variant="destructive" 
             size="sm"
           >
-            Hentikan Tes Darurat
+            Hentikan Tes & Lihat Hasil
           </Button>
         </div>
       </div>

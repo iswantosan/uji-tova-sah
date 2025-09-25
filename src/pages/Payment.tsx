@@ -199,67 +199,29 @@ const Payment = () => {
               <CardTitle>Informasi Pembayaran</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Biaya Tes TOVA:</span>
-                <span className="font-bold">Rp 350.000</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Biaya Admin:</span>
-                <span>Rp 0</span>
-              </div>
-              <hr />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total:</span>
-                <span className="text-primary">Rp 350.000</span>
-              </div>
+              <p className="text-gray-600 text-center">
+                Silakan lakukan pembayaran sesuai instruksi yang akan diberikan oleh admin.
+              </p>
             </CardContent>
           </Card>
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Cara Pembayaran</CardTitle>
+              <CardTitle>Proses Selanjutnya</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold">Transfer Bank:</h4>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                  <div className="flex justify-between">
-                    <span>Bank BCA:</span>
-                    <span className="font-mono">1234567890</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Atas Nama:</span>
-                    <span>PT TOVA Indonesia</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-semibold">E-Wallet:</h4>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                  <div className="flex justify-between">
-                    <span>GoPay/OVO/DANA:</span>
-                    <span className="font-mono">081234567890</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Atas Nama:</span>
-                    <span>TOVA Indonesia</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-yellow-800 mb-2">Penting:</h4>
-                <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• Sertakan kode pembayaran sebagai berita transfer</li>
-                  <li>• Simpan bukti transfer untuk verifikasi</li>
-                  <li>• Proses verifikasi 1-24 jam kerja</li>
-                  <li>• Setelah diverifikasi, Anda bisa mulai tes</li>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">Langkah Selanjutnya:</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>1. Hubungi admin untuk detail pembayaran</li>
+                  <li>2. Lakukan pembayaran sesuai instruksi admin</li>
+                  <li>3. Tunggu persetujuan dari admin</li>
+                  <li>4. Setelah disetujui, Anda dapat mengakses tes</li>
                 </ul>
               </div>
 
               <Button asChild className="w-full" size="lg">
-                <Link to="/test-access">Saya Sudah Transfer - Akses Tes</Link>
+                <Link to="/test-access">Cek Status Pembayaran</Link>
               </Button>
             </CardContent>
           </Card>

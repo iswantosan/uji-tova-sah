@@ -57,6 +57,33 @@ const TestAccess = () => {
         return;
       }
 
+      // Check payment status
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('email', formData.email)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      if (paymentError) {
+        console.error('Payment check error:', paymentError);
+        toast({
+          title: "Error",
+          description: "Terjadi kesalahan saat memeriksa status pembayaran.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!payment) {
+        toast({
+          title: "Pembayaran Belum Disetujui",
+          description: "Pembayaran Anda belum disetujui oleh admin. Silakan tunggu atau hubungi admin.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Store session for test access
       localStorage.setItem('tova_session', JSON.stringify({
         email: registration.email,

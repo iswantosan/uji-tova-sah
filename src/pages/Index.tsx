@@ -130,7 +130,7 @@ const Index = () => {
             <span className="text-lg font-semibold">TOVA Test</span>
           </div>
           <p className="text-gray-400">
-            © 2024 TOVA Test Platform. Semua hak cipta dilindungi.
+            © 2025 TOVA Test Platform. Semua hak cipta dilindungi.
           </p>
         </div>
       </footer>

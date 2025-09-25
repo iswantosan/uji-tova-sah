@@ -76,11 +76,11 @@ const Register = () => {
 
       toast({
         title: "Registrasi Berhasil!",
-        description: "Anda dapat langsung mengakses tes TOVA.",
+        description: "Silakan lanjutkan ke pembayaran untuk mengakses tes.",
       });
 
-      // Redirect to test
-      navigate('/test');
+      // Redirect to payment
+      navigate('/payment');
 
     } catch (error) {
       console.error('Error registering:', error);
@@ -218,7 +218,7 @@ const Register = () => {
                 </div>
 
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                  {isLoading ? "Mendaftar..." : "Daftar & Mulai Tes"}
+                  {isLoading ? "Mendaftar..." : "Daftar & Lanjut Pembayaran"}
                 </Button>
               </form>
             </CardContent>
