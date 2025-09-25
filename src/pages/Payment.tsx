@@ -10,13 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Payment = () => {
   const [email, setEmail] = useState("");
-  const [paymentCode, setPaymentCode] = useState("");
-  const [showPaymentCode, setShowPaymentCode] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const generatePaymentCode = async () => {
+  const checkPaymentStatus = async () => {
     if (!email) {
       toast({
         title: "Error",
@@ -26,52 +24,33 @@ const Payment = () => {
       return;
     }
 
-
     setIsLoading(true);
 
     try {
-      // Check if email is registered
-      const { data: registration, error: regError } = await (supabase as any)
-        .from('registrations')
+      // Check payment record
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
         .select('*')
         .eq('email', email)
         .single();
 
-      if (regError || !registration) {
+      if (paymentError || !payment) {
         toast({
           title: "Error",
-          description: "Email tidak terdaftar. Silakan registrasi terlebih dahulu.",
+          description: "Email tidak ditemukan atau belum terdaftar.",
           variant: "destructive"
         });
         return;
       }
 
-      // Generate unique payment code
-      const code = `TOVA-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      
-      // Insert payment record
-      const { error: paymentError } = await (supabase as any)
-        .from('payments')
-        .insert({
-          registration_id: registration.id,
-          email: email,
-          payment_code: code,
-          amount: 350000
-        });
-
-      if (paymentError) {
-        throw paymentError;
-      }
-
-      setPaymentCode(code);
-      setShowPaymentCode(true);
+      setPaymentData(payment);
       
       toast({
-        title: "Kode Pembayaran Dibuat!",
-        description: "Silakan lakukan pembayaran dan simpan bukti transfer",
+        title: "Data Ditemukan!",
+        description: "Informasi pembayaran Anda telah ditemukan.",
       });
     } catch (error) {
-      console.error('Error generating payment code:', error);
+      console.error('Error checking payment:', error);
       toast({
         title: "Error",
         description: "Terjadi kesalahan. Silakan coba lagi.",
@@ -80,16 +59,6 @@ const Payment = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast({
-      title: "Disalin!",
-      description: "Kode pembayaran telah disalin ke clipboard",
-    });
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -117,17 +86,17 @@ const Payment = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Generate Kode Pembayaran
+              Status Registrasi & Pembayaran
             </h2>
             <p className="text-lg text-gray-600">
-              Masukkan email Anda untuk mendapatkan kode pembayaran
+              Cek status registrasi dan kode pembayaran Anda
             </p>
           </div>
 
-          {!showPaymentCode ? (
+          {!paymentData ? (
             <Card className="shadow-lg mb-6">
               <CardHeader>
-                <CardTitle>Email Terdaftar</CardTitle>
+                <CardTitle>Cek Status Registrasi</CardTitle>
                 <CardDescription>
                   Masukkan email yang sama dengan saat registrasi
                 </CardDescription>
@@ -146,11 +115,11 @@ const Payment = () => {
                     />
                   </div>
                   <Button 
-                    onClick={generatePaymentCode}
+                    onClick={checkPaymentStatus}
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Membuat Kode..." : "Generate Kode Pembayaran"}
+                    {isLoading ? "Mengecek..." : "Cek Status"}
                   </Button>
                 </div>
               </CardContent>
@@ -160,34 +129,34 @@ const Payment = () => {
               <div className="text-center mb-6">
                 <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Kode Pembayaran Berhasil Dibuat!
+                  Registrasi Berhasil!
                 </h3>
+                <p className="text-gray-600">
+                  Kami akan memverifikasi registrasi Anda dalam 1x24 jam
+                </p>
               </div>
 
               <Card className="shadow-lg mb-6">
                 <CardHeader>
                   <CardTitle>Kode Pembayaran Anda</CardTitle>
                   <CardDescription>
-                    Gunakan kode ini untuk melakukan pembayaran
+                    Kode ini sudah otomatis dibuat saat registrasi
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="bg-gray-50 p-6 rounded-lg text-center">
                     <div className="text-2xl font-mono font-bold text-primary mb-4">
-                      {paymentCode}
+                      {paymentData.payment_code}
                     </div>
-                    <Button 
-                      onClick={() => copyToClipboard(paymentCode)}
-                      variant="outline"
-                      className="flex items-center space-x-2"
-                    >
-                      {copied ? (
-                        <CheckCircle className="h-4 w-4 text-success" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                      <span>{copied ? "Disalin!" : "Salin Kode"}</span>
-                    </Button>
+                    <div className="text-sm text-gray-600">
+                      Status: <span className={`font-semibold ${
+                        paymentData.status === 'approved' ? 'text-green-600' : 
+                        paymentData.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {paymentData.status === 'approved' ? 'Disetujui' : 
+                         paymentData.status === 'pending' ? 'Menunggu Verifikasi' : 'Ditolak'}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -196,12 +165,15 @@ const Payment = () => {
 
           <Card className="shadow-lg mb-6">
             <CardHeader>
-              <CardTitle>Informasi Pembayaran</CardTitle>
+              <CardTitle>Verifikasi Registrasi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-600 text-center">
-                Silakan lakukan pembayaran sesuai instruksi yang akan diberikan oleh admin.
-              </p>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <p className="text-blue-800 font-medium">
+                  Kami akan memverifikasi registrasi Anda dalam 1x24 jam. 
+                  Setelah diverifikasi, Anda dapat melakukan pembayaran dan mengakses tes TOVA.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

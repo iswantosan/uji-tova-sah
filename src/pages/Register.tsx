@@ -45,15 +45,20 @@ const Register = () => {
     setIsLoading(true);
 
     try {
+      // Generate unique payment code
+      const paymentCode = `TOVA-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
       // Insert registration
-      const { error: regError } = await supabase
+      const { data: regData, error: regError } = await supabase
         .from('registrations')
         .insert({
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
           age: parseInt(formData.age)
-        });
+        })
+        .select()
+        .single();
 
       if (regError) {
         if (regError.code === '23505') { // Unique constraint violation
@@ -66,6 +71,20 @@ const Register = () => {
           throw regError;
         }
         return;
+      }
+
+      // Insert payment record with generated code
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          registration_id: regData.id,
+          email: formData.email,
+          payment_code: paymentCode,
+          amount: 350000
+        });
+
+      if (paymentError) {
+        throw paymentError;
       }
 
       // Store session for direct test access
