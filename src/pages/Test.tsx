@@ -10,14 +10,16 @@ import { supabase } from "@/integrations/supabase/client";
 const Test = () => {
   const [testPhase, setTestPhase] = useState<'verification' | 'instructions' | 'practice' | 'test' | 'completed'>('verification');
   const [paymentCode, setPaymentCode] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [timeLeft, setTimeLeft] = useState(21 * 60); // 21 minutes in seconds
   const [currentTrial, setCurrentTrial] = useState(0);
   const [totalTrials] = useState(320);
   const [showStimulus, setShowStimulus] = useState(false);
   const [isTarget, setIsTarget] = useState(false);
-  const [responses, setResponses] = useState<number[]>([]);
+  const [responses, setResponses] = useState<{time: number, isCorrect: boolean, responseTime: number}[]>([]);
   const [showInstructions, setShowInstructions] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [testStartTime, setTestStartTime] = useState<number>(0);
   const { toast } = useToast();
 
   // Timer for test duration
@@ -70,9 +72,10 @@ const Test = () => {
   };
 
   const handleSpacePress = () => {
-    if (testPhase === 'test') {
-      const responseTime = Date.now();
-      setResponses(prev => [...prev, responseTime]);
+    if (testPhase === 'test' && showStimulus) {
+      const responseTime = Date.now() - testStartTime;
+      const isCorrect = isTarget; // Correct if user pressed space on target
+      setResponses(prev => [...prev, { time: Date.now(), isCorrect, responseTime }]);
     }
   };
 
@@ -121,6 +124,9 @@ const Test = () => {
         return;
       }
 
+      // Store user email for test results
+      setUserEmail(payment.email);
+
       toast({
         title: "Verifikasi Berhasil!",
         description: "Kode pembayaran valid. Anda dapat memulai tes.",
@@ -141,18 +147,69 @@ const Test = () => {
 
   const startTest = () => {
     setTestPhase('test');
+    setTestStartTime(Date.now());
     toast({
       title: "Tes Dimulai",
       description: "Tekan SPASI setiap kali melihat target. Fokus dan konsentrasi!",
     });
   };
 
-  const finishTest = () => {
+  const finishTest = async () => {
     setTestPhase('completed');
-    toast({
-      title: "Tes Selesai!",
-      description: "Terima kasih telah menyelesaikan tes TOVA.",
-    });
+    
+    // Calculate test metrics
+    const correctResponses = responses.filter(r => r.isCorrect).length;
+    const totalTargets = Math.floor(totalTrials * 0.22); // Approximately 22% are targets
+    const omissionErrors = totalTargets - correctResponses;
+    const commissionErrors = responses.filter(r => !r.isCorrect).length;
+    const avgResponseTime = responses.length > 0 ? 
+      responses.reduce((sum, r) => sum + r.responseTime, 0) / responses.length : 0;
+    const rtVariability = responses.length > 1 ? 
+      Math.sqrt(responses.reduce((sum, r) => sum + Math.pow(r.responseTime - avgResponseTime, 2), 0) / (responses.length - 1)) : 0;
+
+    try {
+      // Save test results to database
+      const { error } = await supabase
+        .from('test_results')
+        .insert({
+          email: userEmail,
+          payment_code: paymentCode,
+          duration: `${Math.floor((21 * 60 - timeLeft) / 60)}:${((21 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
+          omission_errors: omissionErrors,
+          commission_errors: commissionErrors,
+          response_time: avgResponseTime,
+          variability: rtVariability,
+          status: 'completed'
+        });
+
+      if (error) {
+        console.error('Error saving test results:', error);
+        toast({
+          title: "Warning",
+          description: "Tes selesai tapi ada masalah menyimpan hasil. Hubungi admin.",
+          variant: "destructive"
+        });
+      } else {
+        // Store session for results access
+        localStorage.setItem('tova_session', JSON.stringify({
+          email: userEmail,
+          name: userEmail.split('@')[0] // Use email prefix as name for now
+        }));
+        
+        toast({
+          title: "Tes Selesai!",
+          description: "Hasil telah disimpan. Mengarahkan ke halaman hasil...",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving test results:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan hasil tes. Hubungi admin.",
+        variant: "destructive"
+      });
+    }
+
     // Navigate to results
     setTimeout(() => {
       window.location.href = "/results";

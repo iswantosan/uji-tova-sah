@@ -263,19 +263,28 @@ const Results = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Keseluruhan:</span>
-                    <span className="font-semibold text-success">{testResults.interpretation.overall}</span>
+                    <span className="font-semibold text-success">Normal</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Perhatian:</span>
-                    <span className="font-semibold text-warning">{testResults.interpretation.attention}</span>
+                    <span className={`font-semibold ${getPerformanceColor(testResults.performance.attentiveness)}`}>
+                      {testResults.performance.attentiveness >= 80 ? 'Baik' : 
+                       testResults.performance.attentiveness >= 60 ? 'Sedang' : 'Perlu Perbaikan'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Kontrol Impuls:</span>
-                    <span className="font-semibold text-success">{testResults.interpretation.impulseControl}</span>
+                    <span className={`font-semibold ${getPerformanceColor(testResults.performance.impulsivity)}`}>
+                      {testResults.performance.impulsivity >= 80 ? 'Baik' : 
+                       testResults.performance.impulsivity >= 60 ? 'Sedang' : 'Perlu Perbaikan'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Konsistensi:</span>
-                    <span className="font-semibold text-warning">{testResults.interpretation.consistency}</span>
+                    <span className={`font-semibold ${getPerformanceColor(testResults.performance.consistency)}`}>
+                      {testResults.performance.consistency >= 80 ? 'Baik' : 
+                       testResults.performance.consistency >= 60 ? 'Sedang' : 'Perlu Perbaikan'}
+                    </span>
                   </div>
                 </div>
               </CardContent>
