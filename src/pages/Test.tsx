@@ -185,8 +185,8 @@ const Test = () => {
     const targetsShown = stimuliShown.filter(s => s.isTarget).length;
     const nonTargetsShown = stimuliShown.filter(s => !s.isTarget).length;
     
-    const correctTargetResponses = responses.filter(r => r.isTarget && r.isCorrect && r.responseTime > 0).length;
-    const commissionErrors = responses.filter(r => !r.isTarget || (r.isTarget && !r.isCorrect && r.responseTime === 0)).length; // Responses to non-targets or false responses
+    const correctTargetResponses = responses.filter(r => r.isTarget && r.isCorrect).length;
+    const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
     const omissionErrors = Math.max(0, targetsShown - correctTargetResponses); // Missed targets, never negative
     
     // Calculate response time metrics - be more lenient with filtering
