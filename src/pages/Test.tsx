@@ -16,10 +16,12 @@ const Test = () => {
   const [totalTrials] = useState(320);
   const [showStimulus, setShowStimulus] = useState(false);
   const [isTarget, setIsTarget] = useState(false);
-  const [responses, setResponses] = useState<{time: number, isCorrect: boolean, responseTime: number}[]>([]);
+  const [responses, setResponses] = useState<{time: number, isCorrect: boolean, responseTime: number, isTarget: boolean}[]>([]);
+  const [stimuliShown, setStimuliShown] = useState<{isTarget: boolean, time: number}[]>([]);
   const [showInstructions, setShowInstructions] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [testStartTime, setTestStartTime] = useState<number>(0);
+  const [stimulusStartTime, setStimulusStartTime] = useState<number>(0);
   const { toast } = useToast();
 
   // Timer for test duration
@@ -52,7 +54,11 @@ const Test = () => {
         const isTargetTrial = Math.random() < 0.22;
         setIsTarget(isTargetTrial);
         setShowStimulus(true);
+        setStimulusStartTime(Date.now());
         setCurrentTrial(prev => prev + 1);
+        
+        // Track all stimuli shown
+        setStimuliShown(prev => [...prev, { isTarget: isTargetTrial, time: Date.now() }]);
         
         // Hide stimulus after 100ms (TOVA standard)
         setTimeout(() => {
@@ -73,9 +79,12 @@ const Test = () => {
 
   const handleSpacePress = () => {
     if (testPhase === 'test' && showStimulus) {
-      const responseTime = Date.now() - testStartTime;
+      const responseTime = Date.now() - stimulusStartTime;
       const isCorrect = isTarget; // Correct if user pressed space on target
-      setResponses(prev => [...prev, { time: Date.now(), isCorrect, responseTime }]);
+      setResponses(prev => [...prev, { time: Date.now(), isCorrect, responseTime, isTarget }]);
+    } else if (testPhase === 'test' && !showStimulus) {
+      // User pressed space when no stimulus (commission error on blank)
+      setResponses(prev => [...prev, { time: Date.now(), isCorrect: false, responseTime: 0, isTarget: false }]);
     }
   };
 
@@ -157,15 +166,25 @@ const Test = () => {
   const finishTest = async () => {
     setTestPhase('completed');
     
-    // Calculate test metrics
-    const correctResponses = responses.filter(r => r.isCorrect).length;
-    const totalTargets = Math.floor(totalTrials * 0.22); // Approximately 22% are targets
-    const omissionErrors = totalTargets - correctResponses;
-    const commissionErrors = responses.filter(r => !r.isCorrect).length;
-    const avgResponseTime = responses.length > 0 ? 
-      responses.reduce((sum, r) => sum + r.responseTime, 0) / responses.length : 0;
-    const rtVariability = responses.length > 1 ? 
-      Math.sqrt(responses.reduce((sum, r) => sum + Math.pow(r.responseTime - avgResponseTime, 2), 0) / (responses.length - 1)) : 0;
+    // Calculate test metrics correctly
+    const targetsShown = stimuliShown.filter(s => s.isTarget).length;
+    const nonTargetsShown = stimuliShown.filter(s => !s.isTarget).length;
+    
+    const correctTargetResponses = responses.filter(r => r.isTarget && r.isCorrect).length;
+    const incorrectTargetResponses = responses.filter(r => r.isTarget && !r.isCorrect).length;
+    const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
+    const omissionErrors = targetsShown - correctTargetResponses; // Missed targets
+    
+    // Calculate response time metrics only for correct target responses
+    const correctTargetResponseTimes = responses
+      .filter(r => r.isTarget && r.isCorrect && r.responseTime > 0)
+      .map(r => r.responseTime);
+    
+    const avgResponseTime = correctTargetResponseTimes.length > 0 ? 
+      correctTargetResponseTimes.reduce((sum, rt) => sum + rt, 0) / correctTargetResponseTimes.length : 0;
+    
+    const rtVariability = correctTargetResponseTimes.length > 1 ? 
+      Math.sqrt(correctTargetResponseTimes.reduce((sum, rt) => sum + Math.pow(rt - avgResponseTime, 2), 0) / (correctTargetResponseTimes.length - 1)) : 0;
 
     try {
       // Save test results to database
