@@ -363,7 +363,7 @@ const Admin = () => {
                       <TableRow key={payment.id}>
                         <TableCell>{payment.email}</TableCell>
                         <TableCell className="font-mono">{payment.payment_code}</TableCell>
-                        <TableCell>{formatCurrency(payment.amount)}</TableCell>
+                        <TableCell className="text-muted-foreground">***</TableCell>
                         <TableCell>{new Date(payment.created_at).toLocaleDateString('id-ID')}</TableCell>
                         <TableCell>{getStatusBadge(payment.status)}</TableCell>
                         <TableCell>

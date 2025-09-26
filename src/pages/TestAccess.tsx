@@ -125,7 +125,7 @@ const TestAccess = () => {
               <Brain className="h-8 w-8 text-primary" />
               <h1 className="text-2xl font-bold text-primary">TOVA Test</h1>
             </Link>
-            <Button variant="outline" asChild>
+            <Button variant="secondary" asChild>
               <Link to="/" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
                 <span>Kembali</span>
