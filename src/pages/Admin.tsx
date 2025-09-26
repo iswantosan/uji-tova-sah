@@ -347,26 +347,24 @@ const Admin = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Kode Pembayaran</TableHead>
-                      <TableHead>Jumlah</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Aksi</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments.map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>{payment.email}</TableCell>
-                        <TableCell className="font-mono">{payment.payment_code}</TableCell>
-                        <TableCell className="text-muted-foreground">***</TableCell>
-                        <TableCell>{new Date(payment.created_at).toLocaleDateString('id-ID')}</TableCell>
-                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                        <TableCell>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Kode Pembayaran</TableHead>
+                        <TableHead>Tanggal</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Aksi</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {payments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell>{payment.email}</TableCell>
+                          <TableCell className="font-mono">{payment.payment_code}</TableCell>
+                          <TableCell>{new Date(payment.created_at).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                          <TableCell>
                           {payment.status === 'pending' && (
                             <div className="space-x-2">
                               <Button 
