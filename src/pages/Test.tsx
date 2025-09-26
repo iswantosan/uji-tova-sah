@@ -84,16 +84,18 @@ const Test = () => {
     const currentTime = Date.now();
     console.log('🎯 handleSpacePress called:', { testPhase, showStimulus, stimulusStartTime, isTarget, currentTime });
     
-    if (testPhase === 'test' && showStimulus && stimulusStartTime > 0) {
-      const responseTime = currentTime - stimulusStartTime;
+    // Allow response within 2 seconds of stimulus (TOVA standard response window)
+    const timeSinceStimulus = currentTime - stimulusStartTime;
+    if (testPhase === 'test' && stimulusStartTime > 0 && timeSinceStimulus <= 2000) {
+      const responseTime = timeSinceStimulus;
       const isCorrect = isTarget;
-      console.log('✅ Recording valid response:', { responseTime, isCorrect, isTarget });
+      console.log('✅ Recording valid response:', { responseTime, isCorrect, isTarget, timeSinceStimulus });
       setResponses(prev => [...prev, { time: currentTime, isCorrect, responseTime, isTarget }]);
-    } else if (testPhase === 'test' && !showStimulus) {
-      console.log('❌ Commission error - no stimulus');
+    } else if (testPhase === 'test' && (stimulusStartTime === 0 || timeSinceStimulus > 2000)) {
+      console.log('❌ Commission error - no recent stimulus');
       setResponses(prev => [...prev, { time: currentTime, isCorrect: false, responseTime: 0, isTarget: false }]);
     } else {
-      console.log('🚫 Space press ignored:', { testPhase, showStimulus, stimulusStartTime });
+      console.log('🚫 Space press ignored:', { testPhase, showStimulus, stimulusStartTime, timeSinceStimulus });
     }
   }, [testPhase, showStimulus, stimulusStartTime, isTarget]);
 
