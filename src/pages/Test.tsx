@@ -52,13 +52,16 @@ const Test = () => {
 
         // Determine if this trial is a target (22% probability)
         const isTargetTrial = Math.random() < 0.22;
+        const startTime = Date.now();
         setIsTarget(isTargetTrial);
         setShowStimulus(true);
-        setStimulusStartTime(Date.now());
+        setStimulusStartTime(startTime);
         setCurrentTrial(prev => prev + 1);
         
         // Track all stimuli shown
-        setStimuliShown(prev => [...prev, { isTarget: isTargetTrial, time: Date.now() }]);
+        setStimuliShown(prev => [...prev, { isTarget: isTargetTrial, time: startTime }]);
+        
+        console.log('Stimulus shown:', { isTargetTrial, startTime });
         
         // Hide stimulus after 100ms (TOVA standard)
         setTimeout(() => {
