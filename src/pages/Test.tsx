@@ -82,13 +82,18 @@ const Test = () => {
 
   const handleSpacePress = useCallback(() => {
     const currentTime = Date.now();
+    console.log('🎯 handleSpacePress called:', { testPhase, showStimulus, stimulusStartTime, isTarget, currentTime });
     
     if (testPhase === 'test' && showStimulus && stimulusStartTime > 0) {
       const responseTime = currentTime - stimulusStartTime;
       const isCorrect = isTarget;
+      console.log('✅ Recording valid response:', { responseTime, isCorrect, isTarget });
       setResponses(prev => [...prev, { time: currentTime, isCorrect, responseTime, isTarget }]);
     } else if (testPhase === 'test' && !showStimulus) {
+      console.log('❌ Commission error - no stimulus');
       setResponses(prev => [...prev, { time: currentTime, isCorrect: false, responseTime: 0, isTarget: false }]);
+    } else {
+      console.log('🚫 Space press ignored:', { testPhase, showStimulus, stimulusStartTime });
     }
   }, [testPhase, showStimulus, stimulusStartTime, isTarget]);
 
