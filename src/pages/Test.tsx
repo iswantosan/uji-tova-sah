@@ -78,13 +78,18 @@ const Test = () => {
   };
 
   const handleSpacePress = () => {
-    if (testPhase === 'test' && showStimulus) {
-      const responseTime = Date.now() - stimulusStartTime;
+    const currentTime = Date.now();
+    console.log('Space pressed:', { testPhase, showStimulus, stimulusStartTime, currentTime });
+    
+    if (testPhase === 'test' && showStimulus && stimulusStartTime > 0) {
+      const responseTime = currentTime - stimulusStartTime;
       const isCorrect = isTarget; // Correct if user pressed space on target
-      setResponses(prev => [...prev, { time: Date.now(), isCorrect, responseTime, isTarget }]);
+      console.log('Recording response:', { responseTime, isCorrect, isTarget });
+      setResponses(prev => [...prev, { time: currentTime, isCorrect, responseTime, isTarget }]);
     } else if (testPhase === 'test' && !showStimulus) {
       // User pressed space when no stimulus (commission error on blank)
-      setResponses(prev => [...prev, { time: Date.now(), isCorrect: false, responseTime: 0, isTarget: false }]);
+      console.log('Commission error - space pressed with no stimulus');
+      setResponses(prev => [...prev, { time: currentTime, isCorrect: false, responseTime: 0, isTarget: false }]);
     }
   };
 
