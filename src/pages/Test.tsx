@@ -95,17 +95,21 @@ const Test = () => {
   // Keyboard event listener
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      console.log('🎹 Key pressed:', event.code);
       if (event.code === 'Space') {
         event.preventDefault();
+        console.log('🚀 Space detected, calling handleSpacePress');
         handleSpacePress();
       }
     };
 
-    if (testPhase === 'test') {
-      window.addEventListener('keydown', handleKeyPress);
-      return () => window.removeEventListener('keydown', handleKeyPress);
-    }
-  }, [testPhase, showStimulus, stimulusStartTime, isTarget]);
+    console.log('🔗 Adding keyboard listener, testPhase:', testPhase);
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      console.log('🗑️ Removing keyboard listener');
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleSpacePress, testPhase]);
 
   const verifyPaymentCode = async () => {
     if (!paymentCode) {
