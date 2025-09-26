@@ -120,7 +120,7 @@ const Test = () => {
       window.addEventListener('keydown', handleKeyPress);
       return () => window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [testPhase]);
+  }, [testPhase, showStimulus, stimulusStartTime, isTarget]);
 
   const verifyPaymentCode = async () => {
     if (!paymentCode) {
