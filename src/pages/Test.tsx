@@ -175,16 +175,24 @@ const Test = () => {
     const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
     const omissionErrors = targetsShown - correctTargetResponses; // Missed targets
     
-    // Calculate response time metrics only for correct target responses
-    const correctTargetResponseTimes = responses
-      .filter(r => r.isTarget && r.isCorrect && r.responseTime > 0)
+    // Calculate response time metrics for all target responses (correct and incorrect)
+    const targetResponseTimes = responses
+      .filter(r => r.isTarget && r.responseTime > 50) // Filter out very fast/invalid responses
       .map(r => r.responseTime);
     
-    const avgResponseTime = correctTargetResponseTimes.length > 0 ? 
-      correctTargetResponseTimes.reduce((sum, rt) => sum + rt, 0) / correctTargetResponseTimes.length : 0;
+    // Also include correct responses specifically for better calculation
+    const correctTargetResponseTimes = responses
+      .filter(r => r.isTarget && r.isCorrect && r.responseTime > 50)
+      .map(r => r.responseTime);
     
-    const rtVariability = correctTargetResponseTimes.length > 1 ? 
-      Math.sqrt(correctTargetResponseTimes.reduce((sum, rt) => sum + Math.pow(rt - avgResponseTime, 2), 0) / (correctTargetResponseTimes.length - 1)) : 0;
+    // Use correct responses if available, otherwise use all target responses
+    const responseTimesForCalculation = correctTargetResponseTimes.length > 0 ? correctTargetResponseTimes : targetResponseTimes;
+    
+    const avgResponseTime = responseTimesForCalculation.length > 0 ? 
+      Math.round(responseTimesForCalculation.reduce((sum, rt) => sum + rt, 0) / responseTimesForCalculation.length) : 0;
+    
+    const rtVariability = responseTimesForCalculation.length > 1 ? 
+      Math.round(Math.sqrt(responseTimesForCalculation.reduce((sum, rt) => sum + Math.pow(rt - avgResponseTime, 2), 0) / (responseTimesForCalculation.length - 1))) : 0;
 
     try {
       // Save test results to database
