@@ -32,11 +32,11 @@ const TestAccess = () => {
 
     try {
       // Check if registration exists
-      const { data: registration, error } = await supabase
+      const { data: registrations, error } = await supabase
         .from('registrations')
         .select('*')
         .eq('email', formData.email)
-        .maybeSingle();
+        .limit(1);
 
       if (error) {
         console.error('Database error:', error);
@@ -48,7 +48,7 @@ const TestAccess = () => {
         return;
       }
 
-      if (!registration) {
+      if (!registrations || registrations.length === 0) {
         toast({
           title: "Email Tidak Ditemukan",
           description: "Email belum terdaftar. Silakan daftar terlebih dahulu.",
@@ -58,13 +58,12 @@ const TestAccess = () => {
       }
 
       // Check payment status - get first approved payment for email
-      const { data: payment, error: paymentError } = await supabase
+      const { data: payments, error: paymentError } = await supabase
         .from('payments')
         .select('*')
         .eq('email', formData.email)
         .eq('status', 'approved')
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
 
       if (paymentError) {
         console.error('Payment check error:', paymentError);
@@ -76,7 +75,7 @@ const TestAccess = () => {
         return;
       }
 
-      if (!payment) {
+      if (!payments || payments.length === 0) {
         toast({
           title: "Pembayaran Belum Disetujui",
           description: "Pembayaran Anda belum disetujui oleh admin. Silakan tunggu atau hubungi admin.",
@@ -86,6 +85,7 @@ const TestAccess = () => {
       }
 
       // Store session for test access
+      const registration = registrations[0];
       localStorage.setItem('tova_session', JSON.stringify({
         email: registration.email,
         name: registration.name
