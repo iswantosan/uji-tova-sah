@@ -175,24 +175,23 @@ const Test = () => {
     const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
     const omissionErrors = targetsShown - correctTargetResponses; // Missed targets
     
-    // Calculate response time metrics for all target responses (correct and incorrect)
-    const targetResponseTimes = responses
-      .filter(r => r.isTarget && r.responseTime > 50) // Filter out very fast/invalid responses
-      .map(r => r.responseTime);
+    // Calculate response time metrics - be more lenient with filtering
+    const allTargetResponses = responses.filter(r => r.isTarget);
+    const validTargetResponses = responses.filter(r => r.isTarget && r.responseTime > 0 && r.responseTime < 3000);
     
-    // Also include correct responses specifically for better calculation
-    const correctTargetResponseTimes = responses
-      .filter(r => r.isTarget && r.isCorrect && r.responseTime > 50)
-      .map(r => r.responseTime);
+    console.log('Debug RT calculation:', {
+      allTargetResponses: allTargetResponses.length,
+      validTargetResponses: validTargetResponses.length,
+      responses: responses.length,
+      sampleResponse: responses[0],
+      validResponseTimes: validTargetResponses.map(r => r.responseTime)
+    });
     
-    // Use correct responses if available, otherwise use all target responses
-    const responseTimesForCalculation = correctTargetResponseTimes.length > 0 ? correctTargetResponseTimes : targetResponseTimes;
+    const avgResponseTime = validTargetResponses.length > 0 ? 
+      Math.round(validTargetResponses.reduce((sum, r) => sum + r.responseTime, 0) / validTargetResponses.length) : 0;
     
-    const avgResponseTime = responseTimesForCalculation.length > 0 ? 
-      Math.round(responseTimesForCalculation.reduce((sum, rt) => sum + rt, 0) / responseTimesForCalculation.length) : 0;
-    
-    const rtVariability = responseTimesForCalculation.length > 1 ? 
-      Math.round(Math.sqrt(responseTimesForCalculation.reduce((sum, rt) => sum + Math.pow(rt - avgResponseTime, 2), 0) / (responseTimesForCalculation.length - 1))) : 0;
+    const rtVariability = validTargetResponses.length > 1 ? 
+      Math.round(Math.sqrt(validTargetResponses.reduce((sum, r) => sum + Math.pow(r.responseTime - avgResponseTime, 2), 0) / (validTargetResponses.length - 1))) : 0;
 
     try {
       // Save test results to database
