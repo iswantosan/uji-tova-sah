@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,32 +80,17 @@ const Test = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleSpacePress = () => {
+  const handleSpacePress = useCallback(() => {
     const currentTime = Date.now();
-    console.log('🔥 Space pressed!', { 
-      testPhase, 
-      showStimulus, 
-      stimulusStartTime, 
-      currentTime,
-      isTarget,
-      timeDiff: stimulusStartTime > 0 ? currentTime - stimulusStartTime : 'no stimulus time'
-    });
     
     if (testPhase === 'test' && showStimulus && stimulusStartTime > 0) {
       const responseTime = currentTime - stimulusStartTime;
-      const isCorrect = isTarget; // Correct if user pressed space on target
-      console.log('🎯 Recording TARGET response:', { responseTime, isCorrect, isTarget, currentTime, stimulusStartTime });
-      setResponses(prev => {
-        const newResponses = [...prev, { time: currentTime, isCorrect, responseTime, isTarget }];
-        console.log('📊 Updated responses array:', newResponses);
-        return newResponses;
-      });
+      const isCorrect = isTarget;
+      setResponses(prev => [...prev, { time: currentTime, isCorrect, responseTime, isTarget }]);
     } else if (testPhase === 'test' && !showStimulus) {
-      // User pressed space when no stimulus (commission error on blank)
-      console.log('❌ Commission error - space pressed with no stimulus');
       setResponses(prev => [...prev, { time: currentTime, isCorrect: false, responseTime: 0, isTarget: false }]);
     }
-  };
+  }, [testPhase, showStimulus, stimulusStartTime, isTarget]);
 
   // Keyboard event listener
   useEffect(() => {
