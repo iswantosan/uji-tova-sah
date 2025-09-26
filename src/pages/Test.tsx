@@ -250,7 +250,7 @@ const Test = () => {
                   {isLoading ? "Memverifikasi..." : "Verifikasi & Mulai Tes"}
                 </Button>
                 
-                <Button variant="outline" asChild className="w-full">
+                <Button variant="secondary" asChild className="w-full">
                   <Link to="/test-access">Kembali</Link>
                 </Button>
               </CardContent>
@@ -312,7 +312,7 @@ const Test = () => {
               <Button onClick={startTest} size="lg" className="w-full">
                 Mulai Tes TOVA
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="secondary" asChild>
                 <Link to="/test-access">Kembali</Link>
               </Button>
             </div>
