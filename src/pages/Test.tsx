@@ -61,7 +61,7 @@ const Test = () => {
         // Track all stimuli shown
         setStimuliShown(prev => [...prev, { isTarget: isTargetTrial, time: startTime }]);
         
-        console.log('Stimulus shown:', { isTargetTrial, startTime });
+        console.log('🔴 Stimulus shown:', { isTargetTrial, startTime, stimulusType: isTargetTrial ? 'TARGET' : 'NON-TARGET' });
         
         // Hide stimulus after 100ms (TOVA standard)
         setTimeout(() => {
@@ -82,16 +82,27 @@ const Test = () => {
 
   const handleSpacePress = () => {
     const currentTime = Date.now();
-    console.log('Space pressed:', { testPhase, showStimulus, stimulusStartTime, currentTime });
+    console.log('🔥 Space pressed!', { 
+      testPhase, 
+      showStimulus, 
+      stimulusStartTime, 
+      currentTime,
+      isTarget,
+      timeDiff: stimulusStartTime > 0 ? currentTime - stimulusStartTime : 'no stimulus time'
+    });
     
     if (testPhase === 'test' && showStimulus && stimulusStartTime > 0) {
       const responseTime = currentTime - stimulusStartTime;
       const isCorrect = isTarget; // Correct if user pressed space on target
-      console.log('Recording response:', { responseTime, isCorrect, isTarget });
-      setResponses(prev => [...prev, { time: currentTime, isCorrect, responseTime, isTarget }]);
+      console.log('🎯 Recording TARGET response:', { responseTime, isCorrect, isTarget, currentTime, stimulusStartTime });
+      setResponses(prev => {
+        const newResponses = [...prev, { time: currentTime, isCorrect, responseTime, isTarget }];
+        console.log('📊 Updated responses array:', newResponses);
+        return newResponses;
+      });
     } else if (testPhase === 'test' && !showStimulus) {
       // User pressed space when no stimulus (commission error on blank)
-      console.log('Commission error - space pressed with no stimulus');
+      console.log('❌ Commission error - space pressed with no stimulus');
       setResponses(prev => [...prev, { time: currentTime, isCorrect: false, responseTime: 0, isTarget: false }]);
     }
   };
