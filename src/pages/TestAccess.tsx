@@ -11,7 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 const TestAccess = () => {
   const [formData, setFormData] = useState({
-    email: ""
+    email: "",
+    paymentCode: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -19,10 +20,10 @@ const TestAccess = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email) {
+    if (!formData.email || !formData.paymentCode) {
       toast({
         title: "Error",
-        description: "Harap masukkan email",
+        description: "Harap masukkan email dan kode pembayaran",
         variant: "destructive"
       });
       return;
@@ -57,11 +58,12 @@ const TestAccess = () => {
         return;
       }
 
-      // Check payment status
+      // Check payment status with payment code
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
         .select('*')
         .eq('email', formData.email)
+        .eq('payment_code', formData.paymentCode)
         .eq('status', 'approved')
         .maybeSingle();
 
@@ -143,7 +145,7 @@ const TestAccess = () => {
               Akses Tes TOVA
             </h2>
             <p className="text-lg text-gray-600">
-              Masukkan email terdaftar untuk memulai tes
+              Masukkan email dan kode pembayaran untuk memulai tes
             </p>
           </div>
 
@@ -151,7 +153,7 @@ const TestAccess = () => {
             <CardHeader>
               <CardTitle>Verifikasi Akses</CardTitle>
               <CardDescription>
-                Masukkan email yang sudah terdaftar untuk mengakses tes
+                Masukkan email dan kode pembayaran untuk mengakses tes
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -169,9 +171,22 @@ const TestAccess = () => {
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="paymentCode">Kode Pembayaran *</Label>
+                  <Input
+                    id="paymentCode"
+                    name="paymentCode"
+                    type="text"
+                    placeholder="Masukkan kode pembayaran"
+                    value={formData.paymentCode}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
                 <Alert>
                   <AlertDescription>
-                    Pastikan email yang dimasukkan sama dengan saat registrasi.
+                    Pastikan email dan kode pembayaran sesuai dengan data registrasi.
                   </AlertDescription>
                 </Alert>
 
