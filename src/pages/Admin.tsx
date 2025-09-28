@@ -203,6 +203,7 @@ const Admin = () => {
         variant: "destructive"
       });
     }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
