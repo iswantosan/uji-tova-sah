@@ -73,6 +73,35 @@ const Results = () => {
             consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10)))
           }
         });
+
+        // Send email automatically
+        try {
+          const emailData = {
+            email: session.email,
+            name: session.name,
+            testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
+            duration: data.duration,
+            attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
+            impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
+            consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10))),
+            omissionErrors: data.omission_errors,
+            commissionErrors: data.commission_errors,
+            responseTime: Math.round(data.response_time),
+            variability: Math.round(data.variability)
+          };
+
+          await supabase.functions.invoke('send-test-results', {
+            body: emailData
+          });
+
+          toast({
+            title: "Email Terkirim",
+            description: "Hasil tes telah dikirim ke email Anda",
+          });
+        } catch (emailError) {
+          console.error('Error sending email:', emailError);
+          // Don't block the results page if email fails
+        }
       } catch (error) {
         console.error('Error:', error);
         toast({

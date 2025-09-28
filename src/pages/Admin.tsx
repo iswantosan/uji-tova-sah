@@ -167,6 +167,43 @@ const Admin = () => {
     }
   };
 
+  const handleResendEmail = async (result: TestResult) => {
+    try {
+      // Get participant name from registrations
+      const registration = registrations.find(r => r.email === result.email);
+      const participantName = registration?.name || 'Peserta';
+
+      const emailData = {
+        email: result.email,
+        name: participantName,
+        testDate: new Date(result.test_date).toLocaleDateString('id-ID'),
+        duration: result.duration,
+        attentiveness: Math.max(0, Math.min(100, 100 - (result.omission_errors * 2))),
+        impulsivity: Math.max(0, Math.min(100, 100 - (result.commission_errors * 3))),
+        consistency: Math.max(0, Math.min(100, 100 - (result.variability / 10))),
+        omissionErrors: result.omission_errors,
+        commissionErrors: result.commission_errors,
+        responseTime: Math.round(result.response_time),
+        variability: Math.round(result.variability)
+      };
+
+      await supabase.functions.invoke('send-test-results', {
+        body: emailData
+      });
+
+      toast({
+        title: "Email Terkirim",
+        description: `Hasil tes berhasil dikirim ulang ke ${result.email}`,
+      });
+    } catch (error) {
+      console.error('Error resending email:', error);
+      toast({
+        title: "Error",
+        description: "Gagal mengirim ulang email hasil tes",
+        variant: "destructive"
+      });
+    }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -414,6 +451,7 @@ const Admin = () => {
                       <TableHead>RT (ms)</TableHead>
                       <TableHead>Variability</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -428,6 +466,17 @@ const Admin = () => {
                         <TableCell>{result.response_time}</TableCell>
                         <TableCell>{result.variability}</TableCell>
                         <TableCell>{getStatusBadge(result.status)}</TableCell>
+                        <TableCell>
+                          {result.status === 'completed' && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleResendEmail(result)}
+                            >
+                              Resend Email
+                            </Button>
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
