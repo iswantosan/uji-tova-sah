@@ -245,12 +245,12 @@ const Results = () => {
                   <span className="font-semibold">{testResults.performance.commissionErrors}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Response Time (ms):</span>
-                  <span className="font-semibold">{testResults.performance.responseTime}</span>
+                  <span>Response Time:</span>
+                  <span className="font-semibold">{testResults.performance.responseTime} ms</span>
                 </div>
                 <div className="flex justify-between">
                   <span>RT Variability:</span>
-                  <span className="font-semibold">{testResults.performance.responseTimeVariability}</span>
+                  <span className="font-semibold">{testResults.performance.responseTimeVariability} ms</span>
                 </div>
               </CardContent>
             </Card>
@@ -297,33 +297,46 @@ const Results = () => {
               <CardTitle>Rekomendasi</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Hasil Normal dengan Catatan:</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
-                    <li>• Skor perhatian sedikit di bawah rata-rata, latihan konsentrasi dapat membantu</li>
-                    <li>• Konsistensi respons perlu diperbaiki dengan latihan rutin</li>
-                    <li>• Kontrol impuls dalam rentang normal</li>
-                  </ul>
-                </div>
-
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-green-900 mb-2">Saran Tindak Lanjut:</h4>
-                  <ul className="text-sm text-green-800 space-y-1">
-                    <li>• Konsultasikan hasil dengan profesional kesehatan mental</li>
-                    <li>• Pertimbangkan latihan mindfulness untuk meningkatkan fokus</li>
-                    <li>• Evaluasi faktor lingkungan yang dapat mempengaruhi konsentrasi</li>
-                    <li>• Tes ulang dapat dilakukan setelah 6 bulan jika diperlukan</li>
-                  </ul>
-                </div>
+              <div className="space-y-4 text-center text-muted-foreground">
+                <p>Konsultasikan hasil dengan profesional kesehatan mental untuk interpretasi yang lebih mendalam.</p>
               </div>
             </CardContent>
           </Card>
 
           {/* Actions */}
-          <div className="flex justify-center">
+          <div className="flex justify-center space-x-4">
             <Button variant="outline" size="lg" asChild>
               <Link to="/">Kembali ke Beranda</Link>
+            </Button>
+            <Button 
+              size="lg" 
+              onClick={() => {
+                const emailSubject = encodeURIComponent('Hasil Tes TOVA - ' + testResults.participantInfo.name);
+                const emailBody = encodeURIComponent(`
+Hasil Tes TOVA
+
+Nama: ${testResults.participantInfo.name}
+Email: ${testResults.participantInfo.email}
+Tanggal Tes: ${testResults.participantInfo.testDate}
+Durasi Tes: ${testResults.participantInfo.duration}
+
+METRIK KINERJA:
+- Perhatian: ${testResults.performance.attentiveness}%
+- Kontrol Impuls: ${testResults.performance.impulsivity}%
+- Konsistensi: ${testResults.performance.consistency}%
+
+DATA TEKNIS:
+- Omission Errors: ${testResults.performance.omissionErrors}
+- Commission Errors: ${testResults.performance.commissionErrors}
+- Response Time: ${testResults.performance.responseTime} ms
+- RT Variability: ${testResults.performance.responseTimeVariability} ms
+
+Konsultasikan hasil dengan profesional kesehatan mental untuk interpretasi yang lebih mendalam.
+                `);
+                window.open(`mailto:?subject=${emailSubject}&body=${emailBody}`);
+              }}
+            >
+              Email Hasil
             </Button>
           </div>
         </div>
