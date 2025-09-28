@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -54,6 +55,19 @@ const Admin = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Pagination and search states
+  const [searchTerms, setSearchTerms] = useState({
+    registrations: '',
+    payments: '',
+    results: ''
+  });
+  const [currentPage, setCurrentPage] = useState({
+    registrations: 1,
+    payments: 1,
+    results: 1
+  });
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -169,6 +183,8 @@ const Admin = () => {
 
   const handleResendEmail = async (result: TestResult) => {
     try {
+      console.log('Attempting to resend email for:', result.email);
+      
       // Get participant name from registrations
       const registration = registrations.find(r => r.email === result.email);
       const participantName = registration?.name || 'Peserta';
@@ -187,9 +203,17 @@ const Admin = () => {
         variability: Math.round(result.variability)
       };
 
-      await supabase.functions.invoke('send-test-results', {
+      console.log('Email data prepared:', emailData);
+
+      const response = await supabase.functions.invoke('send-test-results', {
         body: emailData
       });
+
+      console.log('Supabase function response:', response);
+
+      if (response.error) {
+        throw response.error;
+      }
 
       toast({
         title: "Email Terkirim",
@@ -203,6 +227,34 @@ const Admin = () => {
         variant: "destructive"
       });
     }
+  };
+
+  // Pagination and search helper functions
+  const filterAndPaginateData = (data: any[], searchTerm: string, page: number, searchFields: string[]) => {
+    const filtered = data.filter(item => 
+      searchFields.some(field => 
+        item[field]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedData = filtered.slice(startIndex, endIndex);
+    
+    return {
+      data: paginatedData,
+      totalItems: filtered.length,
+      totalPages: Math.ceil(filtered.length / itemsPerPage)
+    };
+  };
+
+  const handleSearch = (type: 'registrations' | 'payments' | 'results', value: string) => {
+    setSearchTerms(prev => ({ ...prev, [type]: value }));
+    setCurrentPage(prev => ({ ...prev, [type]: 1 })); // Reset to first page on search
+  };
+
+  const handlePageChange = (type: 'registrations' | 'payments' | 'results', page: number) => {
+    setCurrentPage(prev => ({ ...prev, [type]: page }));
   };
 
   const getStatusBadge = (status: string) => {
@@ -347,6 +399,18 @@ const Admin = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari berdasarkan nama, email, atau telepon..."
+                      value={searchTerms.registrations}
+                      onChange={(e) => handleSearch('registrations', e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -359,18 +423,63 @@ const Admin = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {registrations.map((reg) => (
-                      <TableRow key={reg.id}>
-                        <TableCell className="font-medium">{reg.name}</TableCell>
-                        <TableCell>{reg.email}</TableCell>
-                        <TableCell>{reg.phone}</TableCell>
-                        <TableCell>{reg.age}</TableCell>
-                        <TableCell>{new Date(reg.created_at).toLocaleDateString('id-ID')}</TableCell>
-                        <TableCell>{getStatusBadge(reg.status)}</TableCell>
-                      </TableRow>
-                    ))}
+                    {(() => {
+                      const { data: paginatedRegs, totalPages } = filterAndPaginateData(
+                        registrations, 
+                        searchTerms.registrations, 
+                        currentPage.registrations,
+                        ['name', 'email', 'phone']
+                      );
+                      return paginatedRegs.map((reg) => (
+                        <TableRow key={reg.id}>
+                          <TableCell className="font-medium">{reg.name}</TableCell>
+                          <TableCell>{reg.email}</TableCell>
+                          <TableCell>{reg.phone}</TableCell>
+                          <TableCell>{reg.age}</TableCell>
+                          <TableCell>{new Date(reg.created_at).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>{getStatusBadge(reg.status)}</TableCell>
+                        </TableRow>
+                      ));
+                    })()}
                   </TableBody>
                 </Table>
+                
+                {/* Pagination Controls */}
+                {(() => {
+                  const { totalPages } = filterAndPaginateData(
+                    registrations, 
+                    searchTerms.registrations, 
+                    currentPage.registrations,
+                    ['name', 'email', 'phone']
+                  );
+                  return totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Halaman {currentPage.registrations} dari {totalPages}
+                      </p>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange('registrations', currentPage.registrations - 1)}
+                          disabled={currentPage.registrations === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange('registrations', currentPage.registrations + 1)}
+                          disabled={currentPage.registrations === totalPages}
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
@@ -385,47 +494,104 @@ const Admin = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Kode Pembayaran</TableHead>
-                        <TableHead>Tanggal</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Aksi</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {payments.map((payment) => (
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari berdasarkan email atau kode pembayaran..."
+                      value={searchTerms.payments}
+                      onChange={(e) => handleSearch('payments', e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Kode Pembayaran</TableHead>
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(() => {
+                      const { data: paginatedPayments, totalPages } = filterAndPaginateData(
+                        payments, 
+                        searchTerms.payments, 
+                        currentPage.payments,
+                        ['email', 'payment_code']
+                      );
+                      return paginatedPayments.map((payment) => (
                         <TableRow key={payment.id}>
                           <TableCell>{payment.email}</TableCell>
                           <TableCell className="font-mono">{payment.payment_code}</TableCell>
                           <TableCell>{new Date(payment.created_at).toLocaleDateString('id-ID')}</TableCell>
                           <TableCell>{getStatusBadge(payment.status)}</TableCell>
                           <TableCell>
-                          {payment.status === 'pending' && (
-                            <div className="space-x-2">
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleApprovePayment(payment.id)}
-                                className="bg-success hover:bg-success/90"
-                              >
-                                Setujui
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="destructive"
-                                onClick={() => handleRejectPayment(payment.id)}
-                              >
-                                Tolak
-                              </Button>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            {payment.status === 'pending' && (
+                              <div className="space-x-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleApprovePayment(payment.id)}
+                                  className="bg-success hover:bg-success/90"
+                                >
+                                  Setujui
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => handleRejectPayment(payment.id)}
+                                >
+                                  Tolak
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ));
+                    })()}
                   </TableBody>
                 </Table>
+                
+                {/* Pagination Controls */}
+                {(() => {
+                  const { totalPages } = filterAndPaginateData(
+                    payments, 
+                    searchTerms.payments, 
+                    currentPage.payments,
+                    ['email', 'payment_code']
+                  );
+                  return totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Halaman {currentPage.payments} dari {totalPages}
+                      </p>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange('payments', currentPage.payments - 1)}
+                          disabled={currentPage.payments === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange('payments', currentPage.payments + 1)}
+                          disabled={currentPage.payments === totalPages}
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>
@@ -440,6 +606,18 @@ const Admin = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari berdasarkan email atau kode pembayaran..."
+                      value={searchTerms.results}
+                      onChange={(e) => handleSearch('results', e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -456,32 +634,77 @@ const Admin = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {testResults.map((result) => (
-                      <TableRow key={result.id}>
-                        <TableCell>{result.email}</TableCell>
-                        <TableCell className="font-mono">{result.payment_code}</TableCell>
-                        <TableCell>{new Date(result.test_date).toLocaleDateString('id-ID')}</TableCell>
-                        <TableCell>{result.duration}</TableCell>
-                        <TableCell>{result.omission_errors}</TableCell>
-                        <TableCell>{result.commission_errors}</TableCell>
-                        <TableCell>{result.response_time}</TableCell>
-                        <TableCell>{result.variability}</TableCell>
-                        <TableCell>{getStatusBadge(result.status)}</TableCell>
-                        <TableCell>
-                          {result.status === 'completed' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleResendEmail(result)}
-                            >
-                              Resend Email
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {(() => {
+                      const { data: paginatedResults, totalPages } = filterAndPaginateData(
+                        testResults, 
+                        searchTerms.results, 
+                        currentPage.results,
+                        ['email', 'payment_code']
+                      );
+                      return paginatedResults.map((result) => (
+                        <TableRow key={result.id}>
+                          <TableCell>{result.email}</TableCell>
+                          <TableCell className="font-mono">{result.payment_code}</TableCell>
+                          <TableCell>{new Date(result.test_date).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>{result.duration}</TableCell>
+                          <TableCell>{result.omission_errors}</TableCell>
+                          <TableCell>{result.commission_errors}</TableCell>
+                          <TableCell>{result.response_time}</TableCell>
+                          <TableCell>{result.variability}</TableCell>
+                          <TableCell>{getStatusBadge(result.status)}</TableCell>
+                          <TableCell>
+                            {result.status === 'completed' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleResendEmail(result)}
+                              >
+                                Resend Email
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ));
+                    })()}
                   </TableBody>
                 </Table>
+                
+                {/* Pagination Controls */}
+                {(() => {
+                  const { totalPages } = filterAndPaginateData(
+                    testResults, 
+                    searchTerms.results, 
+                    currentPage.results,
+                    ['email', 'payment_code']
+                  );
+                  return totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <p className="text-sm text-muted-foreground">
+                        Halaman {currentPage.results} dari {totalPages}
+                      </p>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange('results', currentPage.results - 1)}
+                          disabled={currentPage.results === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange('results', currentPage.results + 1)}
+                          disabled={currentPage.results === totalPages}
+                        >
+                          Next
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </TabsContent>

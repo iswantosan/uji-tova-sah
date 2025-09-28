@@ -76,6 +76,8 @@ const Results = () => {
 
         // Send email automatically
         try {
+          console.log('Attempting to send automatic email for:', session.email);
+          
           const emailData = {
             email: session.email,
             name: session.name,
@@ -90,16 +92,29 @@ const Results = () => {
             variability: Math.round(data.variability)
           };
 
-          await supabase.functions.invoke('send-test-results', {
+          console.log('Email data prepared for automatic send:', emailData);
+
+          const response = await supabase.functions.invoke('send-test-results', {
             body: emailData
           });
+
+          console.log('Automatic email response:', response);
+
+          if (response.error) {
+            throw response.error;
+          }
 
           toast({
             title: "Email Terkirim",
             description: "Hasil tes telah dikirim ke email Anda",
           });
         } catch (emailError) {
-          console.error('Error sending email:', emailError);
+          console.error('Error sending automatic email:', emailError);
+          toast({
+            title: "Peringatan",
+            description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
+            variant: "default"
+          });
           // Don't block the results page if email fails
         }
       } catch (error) {
