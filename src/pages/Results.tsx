@@ -14,19 +14,23 @@ const Results = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
+      setLoading(true);
       try {
         // Get session info
         const sessionData = localStorage.getItem('tova_session');
         if (!sessionData) {
+          console.error('No session data found');
           toast({
             title: "Error",
             description: "Session tidak ditemukan. Silakan login kembali.",
             variant: "destructive"
           });
+          setLoading(false);
           return;
         }
 
         const session = JSON.parse(sessionData);
+        console.log('Fetching results for session:', session);
         
         // Fetch test results based on email from session
         const { data, error } = await supabase
@@ -35,26 +39,39 @@ const Results = () => {
           .eq('email', session.email)
           .order('test_date', { ascending: false })
           .limit(1)
-          .maybeSingle();
+          .single();
 
         if (error) {
           console.error('Error fetching results:', error);
-          toast({
-            title: "Error",
-            description: "Gagal mengambil hasil tes.",
-            variant: "destructive"
-          });
+          if (error.code === 'PGRST116') {
+            toast({
+              title: "Tidak Ada Data",
+              description: "Belum ada hasil tes untuk email ini.",
+              variant: "destructive"
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: `Gagal mengambil hasil tes: ${error.message}`,
+              variant: "destructive"
+            });
+          }
+          setLoading(false);
           return;
         }
 
         if (!data) {
+          console.log('No test results found');
           toast({
             title: "Tidak Ada Data",
             description: "Belum ada hasil tes untuk email ini.",
             variant: "destructive"
           });
+          setLoading(false);
           return;
         }
+
+        console.log('Test results fetched successfully:', data);
 
         setTestResults({
           participantInfo: {

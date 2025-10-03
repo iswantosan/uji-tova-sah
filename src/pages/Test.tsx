@@ -208,8 +208,17 @@ const Test = () => {
       Math.round(Math.sqrt(validTargetResponses.reduce((sum, r) => sum + Math.pow(r.responseTime - avgResponseTime, 2), 0) / (validTargetResponses.length - 1))) : 0;
 
     try {
+      console.log('Attempting to save test results:', {
+        email: userEmail,
+        payment_code: paymentCode,
+        omissionErrors,
+        commissionErrors,
+        avgResponseTime,
+        rtVariability
+      });
+
       // Save test results to database
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('test_results')
         .insert({
           email: userEmail,
@@ -220,16 +229,35 @@ const Test = () => {
           response_time: avgResponseTime,
           variability: rtVariability,
           status: 'completed'
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error saving test results:', error);
+        
+        // Check if it's a duplicate payment_code error
+        if (error.code === '23505' && error.message.includes('unique_payment_code')) {
+          toast({
+            title: "Test Sudah Pernah Dikerjakan",
+            description: "Kode pembayaran ini sudah digunakan untuk test sebelumnya. Hubungi admin jika ada masalah.",
+            variant: "destructive"
+          });
+          // Still navigate to results to show existing result
+          setTimeout(() => {
+            window.location.href = "/results";
+          }, 2000);
+          return;
+        }
+        
         toast({
           title: "Warning",
           description: "Tes selesai tapi ada masalah menyimpan hasil. Hubungi admin.",
           variant: "destructive"
         });
       } else {
+        console.log('Test results saved successfully:', data);
+        
         // Store session for results access
         localStorage.setItem('tova_session', JSON.stringify({
           email: userEmail,
@@ -242,7 +270,7 @@ const Test = () => {
         });
       }
     } catch (error) {
-      console.error('Error saving test results:', error);
+      console.error('Unexpected error saving test results:', error);
       toast({
         title: "Error",
         description: "Gagal menyimpan hasil tes. Hubungi admin.",

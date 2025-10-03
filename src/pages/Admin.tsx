@@ -129,8 +129,8 @@ const Admin = () => {
   };
 
   const handleApprovePayment = async (paymentId: string) => {
-
     try {
+      // Update payment status
       const { error } = await (supabase as any)
         .from('payments')
         .update({ status: 'approved' })
@@ -138,12 +138,17 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Update local state instead of refetching everything
+      setPayments(prev => prev.map(payment => 
+        payment.id === paymentId 
+          ? { ...payment, status: 'approved' as const }
+          : payment
+      ));
+
       toast({
         title: "Pembayaran Disetujui",
         description: "Peserta sekarang dapat mengakses tes TOVA",
       });
-
-      fetchData(); // Refresh data
     } catch (error) {
       console.error('Error approving payment:', error);
       toast({
@@ -155,8 +160,8 @@ const Admin = () => {
   };
 
   const handleRejectPayment = async (paymentId: string) => {
-
     try {
+      // Update payment status
       const { error } = await (supabase as any)
         .from('payments')
         .update({ status: 'rejected' })
@@ -164,13 +169,18 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Update local state instead of refetching everything
+      setPayments(prev => prev.map(payment => 
+        payment.id === paymentId 
+          ? { ...payment, status: 'rejected' as const }
+          : payment
+      ));
+
       toast({
         title: "Pembayaran Ditolak",
         description: "Peserta akan diberitahu untuk mengirim ulang bukti pembayaran",
         variant: "destructive"
       });
-
-      fetchData(); // Refresh data
     } catch (error) {
       console.error('Error rejecting payment:', error);
       toast({
