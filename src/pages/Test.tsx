@@ -31,8 +31,8 @@ const Test = () => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
       return () => clearInterval(timer);
-    } else if (timeLeft === 0) {
-      setTestPhase('completed');
+    } else if (testPhase === 'test' && timeLeft === 0) {
+      finishTest();
     }
   }, [testPhase, timeLeft]);
 
