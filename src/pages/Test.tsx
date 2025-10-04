@@ -258,11 +258,14 @@ const Test = () => {
       } else {
         console.log('Test results saved successfully:', data);
         
-        // Store session for results access
+        // Store session with payment_code for results access
         localStorage.setItem('tova_session', JSON.stringify({
           email: userEmail,
-          name: userEmail.split('@')[0] // Use email prefix as name for now
+          name: userEmail.split('@')[0],
+          payment_code: paymentCode
         }));
+        
+        console.log('Session stored:', { email: userEmail, payment_code: paymentCode });
         
         toast({
           title: "Tes Selesai!",

@@ -32,14 +32,12 @@ const Results = () => {
         const session = JSON.parse(sessionData);
         console.log('Fetching results for session:', session);
         
-        // Fetch test results based on email from session
+        // Fetch test results based on payment_code from session (more accurate)
         const { data, error } = await supabase
           .from('test_results')
           .select('*')
-          .eq('email', session.email)
-          .order('test_date', { ascending: false })
-          .limit(1)
-          .single();
+          .eq('payment_code', session.payment_code || '')
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching results:', error);
