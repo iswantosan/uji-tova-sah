@@ -152,6 +152,15 @@ const Test = () => {
       // Store user email for test results
       setUserEmail(payment.email);
 
+      // Store session IMMEDIATELY after verification (don't wait for test completion)
+      localStorage.setItem('tova_session', JSON.stringify({
+        email: payment.email,
+        name: payment.email.split('@')[0],
+        payment_code: paymentCode
+      }));
+      
+      console.log('Session stored after verification:', { email: payment.email, payment_code: paymentCode });
+
       toast({
         title: "Verifikasi Berhasil!",
         description: "Kode pembayaran valid. Anda dapat memulai tes.",
@@ -270,15 +279,6 @@ const Test = () => {
         });
       } else {
         console.log('Test results saved successfully:', data);
-        
-        // Store session with payment_code for results access
-        localStorage.setItem('tova_session', JSON.stringify({
-          email: userEmail,
-          name: userEmail.split('@')[0],
-          payment_code: paymentCode
-        }));
-        
-        console.log('Session stored:', { email: userEmail, payment_code: paymentCode });
         
         toast({
           title: "Tes Selesai!",
