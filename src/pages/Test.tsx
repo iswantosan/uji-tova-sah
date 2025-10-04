@@ -179,7 +179,7 @@ const Test = () => {
     });
   };
 
-  const finishTest = async () => {
+  const finishTest = useCallback(async () => {
     console.log('🏁 finishTest called - userEmail:', userEmail, 'paymentCode:', paymentCode);
     
     if (!userEmail || !paymentCode) {
@@ -298,7 +298,7 @@ const Test = () => {
     setTimeout(() => {
       window.location.href = "/results";
     }, 2000);
-  };
+  }, [userEmail, paymentCode, stimuliShown, responses, timeLeft, toast]);
 
   if (testPhase === 'verification') {
     return (
