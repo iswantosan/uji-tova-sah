@@ -32,9 +32,10 @@ const Test = () => {
       }, 1000);
       return () => clearInterval(timer);
     } else if (testPhase === 'test' && timeLeft === 0) {
+      console.log('⏰ Time is up! userEmail:', userEmail, 'paymentCode:', paymentCode);
       finishTest();
     }
-  }, [testPhase, timeLeft]);
+  }, [testPhase, timeLeft, userEmail, paymentCode]);
 
   // Target presentation logic - TOVA Standard
   useEffect(() => {
@@ -179,6 +180,18 @@ const Test = () => {
   };
 
   const finishTest = async () => {
+    console.log('🏁 finishTest called - userEmail:', userEmail, 'paymentCode:', paymentCode);
+    
+    if (!userEmail || !paymentCode) {
+      console.error('❌ Missing userEmail or paymentCode!', { userEmail, paymentCode });
+      toast({
+        title: "Error",
+        description: "Data email atau kode pembayaran hilang. Silakan coba lagi.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setTestPhase('completed');
     
     // Calculate test metrics correctly
