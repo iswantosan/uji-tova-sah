@@ -24,6 +24,118 @@ const Test = () => {
   const [stimulusStartTime, setStimulusStartTime] = useState<number>(0);
   const { toast } = useToast();
 
+  const finishTest = useCallback(async () => {
+    console.log('🏁 finishTest called - userEmail:', userEmail, 'paymentCode:', paymentCode);
+    
+    if (!userEmail || !paymentCode) {
+      console.error('❌ Missing userEmail or paymentCode!', { userEmail, paymentCode });
+      toast({
+        title: "Error",
+        description: "Data email atau kode pembayaran hilang. Silakan coba lagi.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setTestPhase('completed');
+    
+    // Calculate test metrics correctly
+    const targetsShown = stimuliShown.filter(s => s.isTarget).length;
+    const nonTargetsShown = stimuliShown.filter(s => !s.isTarget).length;
+    
+    const correctTargetResponses = responses.filter(r => r.isTarget && r.isCorrect).length;
+    const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
+    const omissionErrors = Math.max(0, targetsShown - correctTargetResponses); // Missed targets, never negative
+    
+    // Calculate response time metrics - be more lenient with filtering
+    const allTargetResponses = responses.filter(r => r.isTarget);
+    const validTargetResponses = responses.filter(r => r.isTarget && r.responseTime > 0 && r.responseTime < 3000);
+    
+    console.log('Debug RT calculation:', {
+      allTargetResponses: allTargetResponses.length,
+      validTargetResponses: validTargetResponses.length,
+      responses: responses.length,
+      sampleResponse: responses[0],
+      validResponseTimes: validTargetResponses.map(r => r.responseTime)
+    });
+    
+    const avgResponseTime = validTargetResponses.length > 0 ? 
+      Math.round(validTargetResponses.reduce((sum, r) => sum + r.responseTime, 0) / validTargetResponses.length) : 0;
+    
+    const rtVariability = validTargetResponses.length > 1 ? 
+      Math.round(Math.sqrt(validTargetResponses.reduce((sum, r) => sum + Math.pow(r.responseTime - avgResponseTime, 2), 0) / (validTargetResponses.length - 1))) : 0;
+
+    try {
+      console.log('Attempting to save test results:', {
+        email: userEmail,
+        payment_code: paymentCode,
+        omissionErrors,
+        commissionErrors,
+        avgResponseTime,
+        rtVariability
+      });
+
+      // Save test results to database
+      const { data, error } = await supabase
+        .from('test_results')
+        .insert({
+          email: userEmail,
+          payment_code: paymentCode,
+          duration: `${Math.floor((21 * 60 - timeLeft) / 60)}:${((21 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
+          omission_errors: omissionErrors,
+          commission_errors: commissionErrors,
+          response_time: avgResponseTime,
+          variability: rtVariability,
+          status: 'completed'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving test results:', error);
+        
+        // Check if it's a duplicate payment_code error
+        if (error.code === '23505' && error.message.includes('unique_payment_code')) {
+          toast({
+            title: "Test Sudah Pernah Dikerjakan",
+            description: "Kode pembayaran ini sudah digunakan untuk test sebelumnya. Hubungi admin jika ada masalah.",
+            variant: "destructive"
+          });
+          // Still navigate to results to show existing result
+          setTimeout(() => {
+            window.location.href = "/results";
+          }, 2000);
+          return;
+        }
+        
+        toast({
+          title: "Warning",
+          description: "Tes selesai tapi ada masalah menyimpan hasil. Hubungi admin.",
+          variant: "destructive"
+        });
+      } else {
+        console.log('Test results saved successfully:', data);
+        
+        toast({
+          title: "Tes Selesai!",
+          description: "Hasil telah disimpan. Mengarahkan ke halaman hasil...",
+        });
+      }
+    } catch (error) {
+      console.error('Unexpected error saving test results:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menyimpan hasil tes. Hubungi admin.",
+        variant: "destructive"
+      });
+    }
+
+    // Navigate to results
+    setTimeout(() => {
+      window.location.href = "/results";
+    }, 2000);
+  }, [userEmail, paymentCode, stimuliShown, responses, timeLeft, toast]);
+
   // Timer for test duration
   useEffect(() => {
     if (testPhase === 'test' && timeLeft > 0) {
@@ -35,7 +147,7 @@ const Test = () => {
       console.log('⏰ Time is up! userEmail:', userEmail, 'paymentCode:', paymentCode);
       finishTest();
     }
-  }, [testPhase, timeLeft, userEmail, paymentCode]);
+  }, [testPhase, timeLeft, userEmail, paymentCode, finishTest]);
 
   // Target presentation logic - TOVA Standard
   useEffect(() => {
@@ -187,118 +299,6 @@ const Test = () => {
       description: "Tekan SPASI setiap kali melihat target. Fokus dan konsentrasi!",
     });
   };
-
-  const finishTest = useCallback(async () => {
-    console.log('🏁 finishTest called - userEmail:', userEmail, 'paymentCode:', paymentCode);
-    
-    if (!userEmail || !paymentCode) {
-      console.error('❌ Missing userEmail or paymentCode!', { userEmail, paymentCode });
-      toast({
-        title: "Error",
-        description: "Data email atau kode pembayaran hilang. Silakan coba lagi.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setTestPhase('completed');
-    
-    // Calculate test metrics correctly
-    const targetsShown = stimuliShown.filter(s => s.isTarget).length;
-    const nonTargetsShown = stimuliShown.filter(s => !s.isTarget).length;
-    
-    const correctTargetResponses = responses.filter(r => r.isTarget && r.isCorrect).length;
-    const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
-    const omissionErrors = Math.max(0, targetsShown - correctTargetResponses); // Missed targets, never negative
-    
-    // Calculate response time metrics - be more lenient with filtering
-    const allTargetResponses = responses.filter(r => r.isTarget);
-    const validTargetResponses = responses.filter(r => r.isTarget && r.responseTime > 0 && r.responseTime < 3000);
-    
-    console.log('Debug RT calculation:', {
-      allTargetResponses: allTargetResponses.length,
-      validTargetResponses: validTargetResponses.length,
-      responses: responses.length,
-      sampleResponse: responses[0],
-      validResponseTimes: validTargetResponses.map(r => r.responseTime)
-    });
-    
-    const avgResponseTime = validTargetResponses.length > 0 ? 
-      Math.round(validTargetResponses.reduce((sum, r) => sum + r.responseTime, 0) / validTargetResponses.length) : 0;
-    
-    const rtVariability = validTargetResponses.length > 1 ? 
-      Math.round(Math.sqrt(validTargetResponses.reduce((sum, r) => sum + Math.pow(r.responseTime - avgResponseTime, 2), 0) / (validTargetResponses.length - 1))) : 0;
-
-    try {
-      console.log('Attempting to save test results:', {
-        email: userEmail,
-        payment_code: paymentCode,
-        omissionErrors,
-        commissionErrors,
-        avgResponseTime,
-        rtVariability
-      });
-
-      // Save test results to database
-      const { data, error } = await supabase
-        .from('test_results')
-        .insert({
-          email: userEmail,
-          payment_code: paymentCode,
-          duration: `${Math.floor((21 * 60 - timeLeft) / 60)}:${((21 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
-          omission_errors: omissionErrors,
-          commission_errors: commissionErrors,
-          response_time: avgResponseTime,
-          variability: rtVariability,
-          status: 'completed'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error saving test results:', error);
-        
-        // Check if it's a duplicate payment_code error
-        if (error.code === '23505' && error.message.includes('unique_payment_code')) {
-          toast({
-            title: "Test Sudah Pernah Dikerjakan",
-            description: "Kode pembayaran ini sudah digunakan untuk test sebelumnya. Hubungi admin jika ada masalah.",
-            variant: "destructive"
-          });
-          // Still navigate to results to show existing result
-          setTimeout(() => {
-            window.location.href = "/results";
-          }, 2000);
-          return;
-        }
-        
-        toast({
-          title: "Warning",
-          description: "Tes selesai tapi ada masalah menyimpan hasil. Hubungi admin.",
-          variant: "destructive"
-        });
-      } else {
-        console.log('Test results saved successfully:', data);
-        
-        toast({
-          title: "Tes Selesai!",
-          description: "Hasil telah disimpan. Mengarahkan ke halaman hasil...",
-        });
-      }
-    } catch (error) {
-      console.error('Unexpected error saving test results:', error);
-      toast({
-        title: "Error",
-        description: "Gagal menyimpan hasil tes. Hubungi admin.",
-        variant: "destructive"
-      });
-    }
-
-    // Navigate to results
-    setTimeout(() => {
-      window.location.href = "/results";
-    }, 2000);
-  }, [userEmail, paymentCode, stimuliShown, responses, timeLeft, toast]);
 
   if (testPhase === 'verification') {
     return (
