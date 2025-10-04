@@ -25,17 +25,42 @@ const Test = () => {
   const { toast } = useToast();
 
   const finishTest = useCallback(async () => {
-    console.log('🏁 finishTest called - userEmail:', userEmail, 'paymentCode:', paymentCode);
+    console.log('🏁 finishTest called - START');
+    console.log('📧 userEmail:', userEmail);
+    console.log('🔑 paymentCode:', paymentCode);
+    console.log('📊 stimuliShown count:', stimuliShown.length);
+    console.log('📝 responses count:', responses.length);
     
-    if (!userEmail || !paymentCode) {
-      console.error('❌ Missing userEmail or paymentCode!', { userEmail, paymentCode });
-      toast({
-        title: "Error",
-        description: "Data email atau kode pembayaran hilang. Silakan coba lagi.",
-        variant: "destructive"
-      });
-      return;
+    // Check localStorage session as backup
+    const sessionData = localStorage.getItem('tova_session');
+    console.log('💾 localStorage session:', sessionData);
+    
+    // Use session from localStorage as fallback if state values are missing
+    let finalEmail = userEmail;
+    let finalPaymentCode = paymentCode;
+    
+    if (!finalEmail || !finalPaymentCode) {
+      console.error('❌ Missing userEmail or paymentCode from state!', { userEmail, paymentCode });
+      console.error('🔄 Attempting to use session from localStorage...');
+      
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        console.log('✅ Found session in localStorage:', session);
+        finalEmail = session.email;
+        finalPaymentCode = session.payment_code;
+        console.log('✅ Using values from localStorage - email:', finalEmail, 'payment_code:', finalPaymentCode);
+      } else {
+        console.error('❌ No session in localStorage either!');
+        toast({
+          title: "Error",
+          description: "Data email atau kode pembayaran hilang. Silakan coba lagi.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
+    
+    console.log('✅ Final values to save - email:', finalEmail, 'payment_code:', finalPaymentCode);
     
     setTestPhase('completed');
     
@@ -67,8 +92,8 @@ const Test = () => {
 
     try {
       console.log('Attempting to save test results:', {
-        email: userEmail,
-        payment_code: paymentCode,
+        email: finalEmail,
+        payment_code: finalPaymentCode,
         omissionErrors,
         commissionErrors,
         avgResponseTime,
@@ -79,8 +104,8 @@ const Test = () => {
       const { data, error } = await supabase
         .from('test_results')
         .insert({
-          email: userEmail,
-          payment_code: paymentCode,
+          email: finalEmail,
+          payment_code: finalPaymentCode,
           duration: `${Math.floor((21 * 60 - timeLeft) / 60)}:${((21 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
           omission_errors: omissionErrors,
           commission_errors: commissionErrors,
