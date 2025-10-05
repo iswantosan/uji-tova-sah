@@ -26,41 +26,38 @@ const Test = () => {
 
   const finishTest = useCallback(async () => {
     console.log('🏁 finishTest called - START');
-    console.log('📧 userEmail:', userEmail);
-    console.log('🔑 paymentCode:', paymentCode);
     console.log('📊 stimuliShown count:', stimuliShown.length);
     console.log('📝 responses count:', responses.length);
     
-    // Check localStorage session as backup
+    // ALWAYS read from localStorage as primary source of truth
     const sessionData = localStorage.getItem('tova_session');
     console.log('💾 localStorage session:', sessionData);
     
-    // Use session from localStorage as fallback if state values are missing
-    let finalEmail = userEmail;
-    let finalPaymentCode = paymentCode;
-    
-    if (!finalEmail || !finalPaymentCode) {
-      console.error('❌ Missing userEmail or paymentCode from state!', { userEmail, paymentCode });
-      console.error('🔄 Attempting to use session from localStorage...');
-      
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        console.log('✅ Found session in localStorage:', session);
-        finalEmail = session.email;
-        finalPaymentCode = session.payment_code;
-        console.log('✅ Using values from localStorage - email:', finalEmail, 'payment_code:', finalPaymentCode);
-      } else {
-        console.error('❌ No session in localStorage either!');
-        toast({
-          title: "Error",
-          description: "Data email atau kode pembayaran hilang. Silakan coba lagi.",
-          variant: "destructive"
-        });
-        return;
-      }
+    if (!sessionData) {
+      console.error('❌ No session in localStorage!');
+      toast({
+        title: "Error",
+        description: "Sesi hilang. Silakan mulai ulang dari verifikasi.",
+        variant: "destructive"
+      });
+      return;
     }
     
-    console.log('✅ Final values to save - email:', finalEmail, 'payment_code:', finalPaymentCode);
+    const session = JSON.parse(sessionData);
+    const finalEmail = session.email;
+    const finalPaymentCode = session.payment_code;
+    
+    console.log('✅ Using session from localStorage - email:', finalEmail, 'payment_code:', finalPaymentCode);
+    
+    if (!finalEmail || !finalPaymentCode) {
+      console.error('❌ Missing email or payment_code in session!', session);
+      toast({
+        title: "Error",
+        description: "Data sesi tidak lengkap. Silakan mulai ulang.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setTestPhase('completed');
     
@@ -159,7 +156,7 @@ const Test = () => {
     setTimeout(() => {
       window.location.href = "/results";
     }, 2000);
-  }, [userEmail, paymentCode, stimuliShown, responses, timeLeft, toast]);
+  }, [stimuliShown, responses, timeLeft, toast]);
 
   // Timer for test duration
   useEffect(() => {
