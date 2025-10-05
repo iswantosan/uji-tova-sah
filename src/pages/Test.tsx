@@ -11,7 +11,7 @@ const Test = () => {
   const [testPhase, setTestPhase] = useState<'verification' | 'instructions' | 'practice' | 'test' | 'completed'>('verification');
   const [paymentCode, setPaymentCode] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [timeLeft, setTimeLeft] = useState(21 * 60); // 21 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(2 * 60); // 2 minutes in seconds
   const [currentTrial, setCurrentTrial] = useState(0);
   const [totalTrials] = useState(320);
   const [showStimulus, setShowStimulus] = useState(false);
@@ -106,7 +106,7 @@ const Test = () => {
         .insert({
           email: finalEmail,
           payment_code: finalPaymentCode,
-          duration: `${Math.floor((21 * 60 - timeLeft) / 60)}:${((21 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
+          duration: `${Math.floor((2 * 60 - timeLeft) / 60)}:${((2 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
           omission_errors: omissionErrors,
           commission_errors: commissionErrors,
           response_time: avgResponseTime,
@@ -406,7 +406,7 @@ const Test = () => {
                 <div className="bg-blue-900 p-4 rounded">
                   <h4 className="font-semibold mb-2">Aturan Penting:</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Durasi tes: 21 menit (320 stimulus)</li>
+                    <li>• Durasi tes: 2 menit (untuk testing)</li>
                     <li>• Stimulus muncul 0.1 detik, interval 2 detik</li>
                     <li>• Respon hanya dengan menekan SPASI untuk target</li>
                     <li>• Tetap fokus pada layar sepanjang tes</li>
