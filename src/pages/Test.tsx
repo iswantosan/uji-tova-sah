@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,11 +23,35 @@ const Test = () => {
   const [testStartTime, setTestStartTime] = useState<number>(0);
   const [stimulusStartTime, setStimulusStartTime] = useState<number>(0);
   const { toast } = useToast();
+  
+  // Use refs to always get latest state values in timer callback
+  const stimuliShownRef = useRef(stimuliShown);
+  const responsesRef = useRef(responses);
+  const timeLeftRef = useRef(timeLeft);
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    stimuliShownRef.current = stimuliShown;
+  }, [stimuliShown]);
+  
+  useEffect(() => {
+    responsesRef.current = responses;
+  }, [responses]);
+  
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   const finishTest = useCallback(async () => {
     console.log('🏁 finishTest called - START');
-    console.log('📊 stimuliShown count:', stimuliShown.length);
-    console.log('📝 responses count:', responses.length);
+    
+    // Get latest values from refs (not stale closure)
+    const latestStimuliShown = stimuliShownRef.current;
+    const latestResponses = responsesRef.current;
+    const latestTimeLeft = timeLeftRef.current;
+    
+    console.log('📊 stimuliShown count:', latestStimuliShown.length);
+    console.log('📝 responses count:', latestResponses.length);
     
     // ALWAYS read from localStorage as primary source of truth
     const sessionData = localStorage.getItem('tova_session');
@@ -61,17 +85,17 @@ const Test = () => {
     
     setTestPhase('completed');
     
-    // Calculate test metrics correctly
-    const targetsShown = stimuliShown.filter(s => s.isTarget).length;
-    const nonTargetsShown = stimuliShown.filter(s => !s.isTarget).length;
+    // Calculate test metrics correctly using latest values
+    const targetsShown = latestStimuliShown.filter(s => s.isTarget).length;
+    const nonTargetsShown = latestStimuliShown.filter(s => !s.isTarget).length;
     
-    const correctTargetResponses = responses.filter(r => r.isTarget && r.isCorrect).length;
-    const commissionErrors = responses.filter(r => !r.isTarget).length; // Responses to non-targets
+    const correctTargetResponses = latestResponses.filter(r => r.isTarget && r.isCorrect).length;
+    const commissionErrors = latestResponses.filter(r => !r.isTarget).length; // Responses to non-targets
     const omissionErrors = Math.max(0, targetsShown - correctTargetResponses); // Missed targets, never negative
     
     // Calculate response time metrics - be more lenient with filtering
-    const allTargetResponses = responses.filter(r => r.isTarget);
-    const validTargetResponses = responses.filter(r => r.isTarget && r.responseTime > 0 && r.responseTime < 3000);
+    const allTargetResponses = latestResponses.filter(r => r.isTarget);
+    const validTargetResponses = latestResponses.filter(r => r.isTarget && r.responseTime > 0 && r.responseTime < 3000);
     
     console.log('Debug RT calculation:', {
       allTargetResponses: allTargetResponses.length,
@@ -103,7 +127,7 @@ const Test = () => {
         .insert({
           email: finalEmail,
           payment_code: finalPaymentCode,
-          duration: `${Math.floor((21 * 60 - timeLeft) / 60)}:${((21 * 60 - timeLeft) % 60).toString().padStart(2, '0')}`,
+          duration: `${Math.floor((21 * 60 - latestTimeLeft) / 60)}:${((21 * 60 - latestTimeLeft) % 60).toString().padStart(2, '0')}`,
           omission_errors: omissionErrors,
           commission_errors: commissionErrors,
           response_time: avgResponseTime,
@@ -156,7 +180,7 @@ const Test = () => {
     setTimeout(() => {
       window.location.href = "/results";
     }, 2000);
-  }, [stimuliShown, responses, timeLeft, toast]);
+  }, [toast]); // Remove stale dependencies - use refs instead
 
   // Timer for test duration
   useEffect(() => {
