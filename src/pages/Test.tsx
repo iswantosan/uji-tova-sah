@@ -32,26 +32,31 @@ const Test = () => {
   // Keep refs in sync with state
   useEffect(() => {
     stimuliShownRef.current = stimuliShown;
+    console.log('🔄 Ref updated - stimuliShown:', stimuliShown.length, 'ref:', stimuliShownRef.current.length);
   }, [stimuliShown]);
   
   useEffect(() => {
     responsesRef.current = responses;
+    console.log('🔄 Ref updated - responses:', responses.length, 'ref:', responsesRef.current.length);
   }, [responses]);
   
   useEffect(() => {
     timeLeftRef.current = timeLeft;
+    console.log('🔄 Ref updated - timeLeft:', timeLeft, 'ref:', timeLeftRef.current);
   }, [timeLeft]);
 
   const finishTest = useCallback(async () => {
     console.log('🏁 finishTest called - START');
+    console.log('🔍 Current state values - stimuliShown:', stimuliShown.length, 'responses:', responses.length, 'timeLeft:', timeLeft);
     
     // Get latest values from refs (not stale closure)
     const latestStimuliShown = stimuliShownRef.current;
     const latestResponses = responsesRef.current;
     const latestTimeLeft = timeLeftRef.current;
     
-    console.log('📊 stimuliShown count:', latestStimuliShown.length);
-    console.log('📝 responses count:', latestResponses.length);
+    console.log('📊 Ref values - stimuliShown:', latestStimuliShown.length);
+    console.log('📝 Ref values - responses:', latestResponses.length);
+    console.log('⏱️ Ref values - timeLeft:', latestTimeLeft);
     
     // ALWAYS read from localStorage as primary source of truth
     const sessionData = localStorage.getItem('tova_session');
@@ -218,9 +223,11 @@ const Test = () => {
         setCurrentTrial(prev => prev + 1);
         
         // Track all stimuli shown
-        setStimuliShown(prev => [...prev, { isTarget: isTargetTrial, time: startTime }]);
-        
-        console.log('🔴 Stimulus shown:', { isTargetTrial, startTime, stimulusType: isTargetTrial ? 'TARGET' : 'NON-TARGET' });
+        setStimuliShown(prev => {
+          const newArray = [...prev, { isTarget: isTargetTrial, time: startTime }];
+          console.log('🔴 Stimulus shown - new count:', newArray.length, { isTargetTrial, startTime, stimulusType: isTargetTrial ? 'TARGET' : 'NON-TARGET' });
+          return newArray;
+        });
         
         // Hide stimulus after 100ms (TOVA standard)
         setTimeout(() => {
@@ -249,7 +256,11 @@ const Test = () => {
       const responseTime = timeSinceStimulus;
       const isCorrect = isTarget;
       console.log('✅ Recording valid response:', { responseTime, isCorrect, isTarget, timeSinceStimulus });
-      setResponses(prev => [...prev, { time: currentTime, isCorrect, responseTime, isTarget }]);
+      setResponses(prev => {
+        const newArray = [...prev, { time: currentTime, isCorrect, responseTime, isTarget }];
+        console.log('✅ Response recorded - new count:', newArray.length);
+        return newArray;
+      });
     } else if (testPhase === 'test' && (stimulusStartTime === 0 || timeSinceStimulus > 2000)) {
       console.log('❌ Commission error - no recent stimulus');
       setResponses(prev => [...prev, { time: currentTime, isCorrect: false, responseTime: 0, isTarget: false }]);
