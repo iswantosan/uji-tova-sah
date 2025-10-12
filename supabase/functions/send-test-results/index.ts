@@ -200,13 +200,17 @@ const handler = async (req: Request): Promise<Response> => {
       
       console.log("Email sent successfully via SMTP to:", email);
 
-    return new Response(JSON.stringify(emailData), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    });
+      return new Response(JSON.stringify({ success: true, message: "Email sent" }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    } catch (smtpError: any) {
+      console.error("SMTP error:", smtpError);
+      throw new Error(`Failed to send email via SMTP: ${smtpError.message}`);
+    }
   } catch (error: any) {
     console.error("Error in send-test-results function:", error);
     return new Response(
