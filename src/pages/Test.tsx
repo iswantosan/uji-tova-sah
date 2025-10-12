@@ -210,7 +210,8 @@ const Test = () => {
 
       const interval = setInterval(() => {
         if (currentTrial >= totalTrials) {
-          setTestPhase('completed');
+          console.log('✅ All trials completed! Calling finishTest...');
+          finishTest();
           return;
         }
 
