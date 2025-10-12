@@ -45,7 +45,16 @@ const Test = () => {
     console.log('🔄 Ref updated - timeLeft:', timeLeft, 'ref:', timeLeftRef.current);
   }, [timeLeft]);
 
+  const isFinishingRef = useRef(false);
+  
   const finishTest = useCallback(async () => {
+    // Prevent double execution
+    if (isFinishingRef.current) {
+      console.log('⚠️ finishTest already running, skipping...');
+      return;
+    }
+    isFinishingRef.current = true;
+    
     console.log('🏁 finishTest called - START');
     console.log('🔍 Current state values - stimuliShown:', stimuliShown.length, 'responses:', responses.length, 'timeLeft:', timeLeft);
     
@@ -69,6 +78,7 @@ const Test = () => {
         description: "Sesi hilang. Silakan mulai ulang dari verifikasi.",
         variant: "destructive"
       });
+      isFinishingRef.current = false;
       return;
     }
     
@@ -85,6 +95,7 @@ const Test = () => {
         description: "Data sesi tidak lengkap. Silakan mulai ulang.",
         variant: "destructive"
       });
+      isFinishingRef.current = false;
       return;
     }
     
@@ -202,17 +213,23 @@ const Test = () => {
 
   // Target presentation logic - TOVA Standard
   useEffect(() => {
-    if (testPhase === 'test') {
-      // Hide instructions after 5 seconds
-      setTimeout(() => {
-        setShowInstructions(false);
-      }, 5000);
+    if (testPhase !== 'test') return;
+    
+    // Hide instructions after 5 seconds
+    setTimeout(() => {
+      setShowInstructions(false);
+    }, 5000);
 
-      const interval = setInterval(() => {
-        if (currentTrial >= totalTrials) {
+    const interval = setInterval(() => {
+      setCurrentTrial(prev => {
+        const nextTrial = prev + 1;
+        
+        // Check if all trials completed
+        if (nextTrial > totalTrials) {
           console.log('✅ All trials completed! Calling finishTest...');
+          clearInterval(interval);
           finishTest();
-          return;
+          return prev; // Don't increment further
         }
 
         // Determine if this trial is a target (22% probability)
@@ -221,11 +238,10 @@ const Test = () => {
         setIsTarget(isTargetTrial);
         setShowStimulus(true);
         setStimulusStartTime(startTime);
-        setCurrentTrial(prev => prev + 1);
         
         // Track all stimuli shown
-        setStimuliShown(prev => {
-          const newArray = [...prev, { isTarget: isTargetTrial, time: startTime }];
+        setStimuliShown(prevStimuli => {
+          const newArray = [...prevStimuli, { isTarget: isTargetTrial, time: startTime }];
           console.log('🔴 Stimulus shown - new count:', newArray.length, { isTargetTrial, startTime, stimulusType: isTargetTrial ? 'TARGET' : 'NON-TARGET' });
           return newArray;
         });
@@ -235,11 +251,12 @@ const Test = () => {
           setShowStimulus(false);
         }, 100);
         
-      }, 2000); // 2-second inter-stimulus interval (TOVA standard)
-      
-      return () => clearInterval(interval);
-    }
-  }, [testPhase, currentTrial, totalTrials]);
+        return nextTrial;
+      });
+    }, 2000); // 2-second inter-stimulus interval (TOVA standard)
+    
+    return () => clearInterval(interval);
+  }, [testPhase, totalTrials, finishTest]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
