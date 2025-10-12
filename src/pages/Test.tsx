@@ -28,6 +28,7 @@ const Test = () => {
   const stimuliShownRef = useRef(stimuliShown);
   const responsesRef = useRef(responses);
   const timeLeftRef = useRef(timeLeft);
+  const isFinishingRef = useRef(false);
   
   // Keep refs in sync with state
   useEffect(() => {
@@ -45,8 +46,6 @@ const Test = () => {
     console.log('🔄 Ref updated - timeLeft:', timeLeft, 'ref:', timeLeftRef.current);
   }, [timeLeft]);
 
-  const isFinishingRef = useRef(false);
-  
   const finishTest = useCallback(async () => {
     // Prevent double execution
     if (isFinishingRef.current) {
