@@ -142,8 +142,8 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send email via SMTP
-    const conn = await Deno.connect({
+    // Send email via SMTP with SSL/TLS
+    const conn = await Deno.connectTls({
       hostname: smtpHost,
       port: smtpPort,
     });
