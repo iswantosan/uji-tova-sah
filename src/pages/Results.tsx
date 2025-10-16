@@ -16,57 +16,78 @@ const Results = () => {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        // Get session info
+        // Check if coming from admin view (sessionStorage)
+        const adminViewData = sessionStorage.getItem('currentTestResult');
+        
+        // Otherwise check regular user session (localStorage)
         const sessionData = localStorage.getItem('tova_session');
-        if (!sessionData) {
+        
+        if (!adminViewData && !sessionData) {
           console.error('No session data found');
           toast({
             title: "Error",
-            description: "Session tidak ditemukan. Silakan login kembali.",
+            description: "Session tidak ditemukan.",
             variant: "destructive"
           });
           setLoading(false);
           return;
         }
 
-        const session = JSON.parse(sessionData);
-        console.log('Fetching results for session:', session);
+        let data, session;
         
-        // Fetch test results based on payment_code from session (more accurate)
-        const { data, error } = await supabase
-          .from('test_results')
-          .select('*')
-          .eq('payment_code', session.payment_code || '')
-          .maybeSingle();
+        // If viewing from admin, use sessionStorage data directly
+        if (adminViewData) {
+          data = JSON.parse(adminViewData);
+          session = {
+            name: 'Admin View',
+            email: data.email,
+            payment_code: data.payment_code
+          };
+          
+          console.log('Viewing test results from admin:', data);
+        } else {
+          // Regular user flow - fetch from database
+          session = JSON.parse(sessionData!);
+          console.log('Fetching results for session:', session);
+          
+          // Fetch test results based on payment_code from session (more accurate)
+          const result = await supabase
+            .from('test_results')
+            .select('*')
+            .eq('payment_code', session.payment_code || '')
+            .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching results:', error);
-          if (error.code === 'PGRST116') {
+          if (result.error) {
+            console.error('Error fetching results:', result.error);
+            if (result.error.code === 'PGRST116') {
+              toast({
+                title: "Tidak Ada Data",
+                description: "Belum ada hasil tes untuk email ini.",
+                variant: "destructive"
+              });
+            } else {
+              toast({
+                title: "Error",
+                description: `Gagal mengambil hasil tes: ${result.error.message}`,
+                variant: "destructive"
+              });
+            }
+            setLoading(false);
+            return;
+          }
+
+          if (!result.data) {
+            console.log('No test results found');
             toast({
               title: "Tidak Ada Data",
               description: "Belum ada hasil tes untuk email ini.",
               variant: "destructive"
             });
-          } else {
-            toast({
-              title: "Error",
-              description: `Gagal mengambil hasil tes: ${error.message}`,
-              variant: "destructive"
-            });
+            setLoading(false);
+            return;
           }
-          setLoading(false);
-          return;
-        }
-
-        if (!data) {
-          console.log('No test results found');
-          toast({
-            title: "Tidak Ada Data",
-            description: "Belum ada hasil tes untuk email ini.",
-            variant: "destructive"
-          });
-          setLoading(false);
-          return;
+          
+          data = result.data;
         }
 
         console.log('Test results fetched successfully:', data);
@@ -74,7 +95,7 @@ const Results = () => {
         setTestResults({
           participantInfo: {
             name: session.name,
-            email: session.email,
+            email: session.email || data.email,
             testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
             duration: data.duration
           },
@@ -89,48 +110,50 @@ const Results = () => {
           }
         });
 
-        // Send email automatically
-        try {
-          console.log('Attempting to send automatic email for:', session.email);
-          
-          const emailData = {
-            email: session.email,
-            name: session.name,
-            testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
-            duration: data.duration,
-            attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
-            impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
-            consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10))),
-            omissionErrors: data.omission_errors,
-            commissionErrors: data.commission_errors,
-            responseTime: Math.round(data.response_time),
-            variability: Math.round(data.variability)
-          };
+        // Only send email automatically for regular users, NOT when viewing from admin
+        if (!adminViewData) {
+          try {
+            console.log('Attempting to send automatic email for:', session.email);
+            
+            const emailData = {
+              email: session.email,
+              name: session.name,
+              testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
+              duration: data.duration,
+              attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
+              impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
+              consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10))),
+              omissionErrors: data.omission_errors,
+              commissionErrors: data.commission_errors,
+              responseTime: Math.round(data.response_time),
+              variability: Math.round(data.variability)
+            };
 
-          console.log('Email data prepared for automatic send:', emailData);
+            console.log('Email data prepared for automatic send:', emailData);
 
-          const response = await supabase.functions.invoke('send-test-results', {
-            body: emailData
-          });
+            const response = await supabase.functions.invoke('send-test-results', {
+              body: emailData
+            });
 
-          console.log('Automatic email response:', response);
+            console.log('Automatic email response:', response);
 
-          if (response.error) {
-            throw response.error;
+            if (response.error) {
+              throw response.error;
+            }
+
+            toast({
+              title: "Email Terkirim",
+              description: "Hasil tes telah dikirim ke email Anda",
+            });
+          } catch (emailError) {
+            console.error('Error sending automatic email:', emailError);
+            toast({
+              title: "Peringatan",
+              description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
+              variant: "default"
+            });
+            // Don't block the results page if email fails
           }
-
-          toast({
-            title: "Email Terkirim",
-            description: "Hasil tes telah dikirim ke email Anda",
-          });
-        } catch (emailError) {
-          console.error('Error sending automatic email:', emailError);
-          toast({
-            title: "Peringatan",
-            description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
-            variant: "default"
-          });
-          // Don't block the results page if email fails
         }
       } catch (error) {
         console.error('Error:', error);
