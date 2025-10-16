@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,6 +50,7 @@ type TestResult = {
 const Admin = () => {
   const { toast } = useToast();
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
@@ -189,6 +190,12 @@ const Admin = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleViewDetails = (result: TestResult) => {
+    // Store result data in sessionStorage to be accessed by Results page
+    sessionStorage.setItem('currentTestResult', JSON.stringify(result));
+    navigate('/results');
   };
 
   const handleResendEmail = async (result: TestResult) => {
@@ -663,15 +670,27 @@ const Admin = () => {
                           <TableCell>{result.variability}</TableCell>
                           <TableCell>{getStatusBadge(result.status)}</TableCell>
                           <TableCell>
-                            {result.status === 'completed' && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleResendEmail(result)}
-                              >
-                                Resend Email
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {result.status === 'completed' && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleViewDetails(result)}
+                                  >
+                                    <Eye className="mr-1 h-4 w-4" />
+                                    View
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleResendEmail(result)}
+                                  >
+                                    Resend Email
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ));
