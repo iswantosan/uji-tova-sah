@@ -142,6 +142,7 @@ const Test = () => {
         .insert({
           email: finalEmail,
           payment_code: finalPaymentCode,
+          participant_name: session.name || 'Peserta',
           duration: `${Math.floor((21.6 * 60 - latestTimeLeft) / 60)}:${((21.6 * 60 - latestTimeLeft) % 60).toString().padStart(2, '0')}`,
           omission_errors: omissionErrors,
           commission_errors: commissionErrors,

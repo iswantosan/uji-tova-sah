@@ -39,7 +39,7 @@ const Results = () => {
         if (adminViewData) {
           data = JSON.parse(adminViewData);
           session = {
-            name: data.participant_name || 'Peserta',
+            name: data.participant_name || data.email,
             email: data.email,
             payment_code: data.payment_code
           };

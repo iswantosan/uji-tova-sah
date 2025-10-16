@@ -140,6 +140,7 @@ export type Database = {
           email: string
           id: string
           omission_errors: number
+          participant_name: string | null
           payment_code: string
           payment_id: string | null
           response_time: number
@@ -153,6 +154,7 @@ export type Database = {
           email: string
           id?: string
           omission_errors?: number
+          participant_name?: string | null
           payment_code: string
           payment_id?: string | null
           response_time?: number
@@ -166,6 +168,7 @@ export type Database = {
           email?: string
           id?: string
           omission_errors?: number
+          participant_name?: string | null
           payment_code?: string
           payment_id?: string | null
           response_time?: number
