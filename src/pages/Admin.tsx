@@ -662,7 +662,18 @@ const Admin = () => {
                         <TableRow key={result.id}>
                           <TableCell>{result.email}</TableCell>
                           <TableCell className="font-mono">{result.payment_code}</TableCell>
-                          <TableCell>{new Date(result.test_date).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>
+                            {new Date(result.test_date).toLocaleDateString('id-ID', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            })}
+                            {' '}
+                            {new Date(result.test_date).toLocaleTimeString('id-ID', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </TableCell>
                           <TableCell>{result.duration}</TableCell>
                           <TableCell>{result.omission_errors}</TableCell>
                           <TableCell>{result.commission_errors}</TableCell>
