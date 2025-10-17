@@ -137,6 +137,7 @@ const Test = () => {
       });
 
       // Save test results to database via edge function to bypass RLS
+      console.log('Calling save-test-results edge function...');
       const { data, error } = await supabase.functions.invoke('save-test-results', {
         body: {
           email: finalEmail,
@@ -150,11 +151,17 @@ const Test = () => {
         }
       });
 
-      if (error) {
-        console.error('Error saving test results:', error);
+      console.log('Edge function response:', { data, error });
+
+      // Check if there's an error in the response data
+      const responseError = error || data?.error;
+      
+      if (responseError) {
+        console.error('Error saving test results:', responseError);
         
         // Check if it's a duplicate payment_code error
-        if (error.code === '23505' && error.message.includes('unique_payment_code')) {
+        const errorMessage = responseError?.message || responseError;
+        if (responseError?.code === '23505' || errorMessage?.includes('unique_payment_code')) {
           toast({
             title: "Test Sudah Pernah Dikerjakan",
             description: "Kode pembayaran ini sudah digunakan untuk test sebelumnya. Hubungi admin jika ada masalah.",
