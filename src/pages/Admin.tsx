@@ -528,7 +528,6 @@ const Admin = () => {
                       <TableHead>Usia</TableHead>
                       <TableHead>Tanggal</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -547,20 +546,6 @@ const Admin = () => {
                           <TableCell>{reg.age}</TableCell>
                           <TableCell>{new Date(reg.created_at).toLocaleDateString('id-ID')}</TableCell>
                           <TableCell>{getStatusBadge(reg.status)}</TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setDeleteDialog({
-                                open: true,
-                                type: 'registration',
-                                id: reg.id,
-                                name: reg.name
-                              })}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
                         </TableRow>
                       ));
                     })()}
