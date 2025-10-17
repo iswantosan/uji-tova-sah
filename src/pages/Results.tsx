@@ -46,48 +46,38 @@ const Results = () => {
           
           console.log('Viewing test results from admin:', data);
         } else {
-          // Regular user flow - fetch from database
+          // Regular user flow - fetch from database via edge function
           session = JSON.parse(sessionData!);
           console.log('Fetching results for session:', session);
           
-          // Fetch test results based on payment_code from session (more accurate)
-          const result = await supabase
-            .from('test_results')
-            .select('*')
-            .eq('payment_code', session.payment_code || '')
-            .maybeSingle();
+          // Fetch test results using edge function to bypass RLS
+          const response = await supabase.functions.invoke('get-test-results', {
+            body: { payment_code: session.payment_code || '' }
+          });
 
-          if (result.error) {
-            console.error('Error fetching results:', result.error);
-            if (result.error.code === 'PGRST116') {
-              toast({
-                title: "Tidak Ada Data",
-                description: "Belum ada hasil tes untuk email ini.",
-                variant: "destructive"
-              });
-            } else {
-              toast({
-                title: "Error",
-                description: `Gagal mengambil hasil tes: ${result.error.message}`,
-                variant: "destructive"
-              });
-            }
+          if (response.error) {
+            console.error('Error fetching results:', response.error);
+            toast({
+              title: "Error",
+              description: `Gagal mengambil hasil tes: ${response.error.message}`,
+              variant: "destructive"
+            });
             setLoading(false);
             return;
           }
 
-          if (!result.data) {
+          if (!response.data?.data) {
             console.log('No test results found');
             toast({
               title: "Tidak Ada Data",
-              description: "Belum ada hasil tes untuk email ini.",
+              description: "Belum ada hasil tes untuk kode pembayaran ini.",
               variant: "destructive"
             });
             setLoading(false);
             return;
           }
           
-          data = result.data;
+          data = response.data.data;
         }
 
         console.log('Test results fetched successfully:', data);
