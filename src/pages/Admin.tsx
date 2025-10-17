@@ -6,7 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { Brain, ArrowLeft, CheckCircle, XCircle, Clock, Users, CreditCard, FileText, LogOut, Search, ChevronLeft, ChevronRight, Eye, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -68,7 +78,13 @@ const Admin = () => {
     payments: 1,
     results: 1
   });
-  const itemsPerPage = 10;
+  const [itemsPerPage] = useState(10);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    type: 'registration' | 'result' | null;
+    id: string | null;
+    name: string;
+  }>({ open: false, type: null, id: null, name: '' });
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -88,17 +104,30 @@ const Admin = () => {
     checkAdmin();
   }, []);
 
-  const fetchData = async () => {
+  const fetchRegistrations = async () => {
+    const { data: regData, error: regError } = await (supabase as any)
+      .from('registrations')
+      .select('*')
+      .order('created_at', { ascending: false });
 
+    if (regError) throw regError;
+    setRegistrations(regData || []);
+  };
+
+  const fetchTestResults = async () => {
+    const { data: testData, error: testError } = await (supabase as any)
+      .from('test_results')
+      .select('*')
+      .order('test_date', { ascending: false });
+
+    if (testError) throw testError;
+    setTestResults(testData || []);
+  };
+
+  const fetchData = async () => {
     try {
       // Fetch registrations
-      const { data: regData, error: regError } = await (supabase as any)
-        .from('registrations')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (regError) throw regError;
-      setRegistrations(regData || []);
+      await fetchRegistrations();
 
       // Fetch payments
       const { data: payData, error: payError } = await (supabase as any)
@@ -110,13 +139,7 @@ const Admin = () => {
       setPayments(payData || []);
 
       // Fetch test results
-      const { data: testData, error: testError } = await (supabase as any)
-        .from('test_results')
-        .select('*')
-        .order('test_date', { ascending: false });
-
-      if (testError) throw testError;
-      setTestResults(testData || []);
+      await fetchTestResults();
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -243,6 +266,74 @@ const Admin = () => {
         description: "Gagal mengirim ulang email hasil tes",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleDeleteRegistration = async () => {
+    if (!deleteDialog.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('registrations')
+        .delete()
+        .eq('id', deleteDialog.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Berhasil",
+        description: "Registrasi berhasil dihapus",
+      });
+
+      // Refresh data
+      fetchRegistrations();
+    } catch (error) {
+      console.error('Error deleting registration:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus registrasi",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteDialog({ open: false, type: null, id: null, name: '' });
+    }
+  };
+
+  const handleDeleteTestResult = async () => {
+    if (!deleteDialog.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('test_results')
+        .delete()
+        .eq('id', deleteDialog.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Berhasil",
+        description: "Hasil test berhasil dihapus",
+      });
+
+      // Refresh data
+      fetchTestResults();
+    } catch (error) {
+      console.error('Error deleting test result:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus hasil test",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteDialog({ open: false, type: null, id: null, name: '' });
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.type === 'registration') {
+      handleDeleteRegistration();
+    } else if (deleteDialog.type === 'result') {
+      handleDeleteTestResult();
     }
   };
 
@@ -437,6 +528,7 @@ const Admin = () => {
                       <TableHead>Usia</TableHead>
                       <TableHead>Tanggal</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -455,6 +547,20 @@ const Admin = () => {
                           <TableCell>{reg.age}</TableCell>
                           <TableCell>{new Date(reg.created_at).toLocaleDateString('id-ID')}</TableCell>
                           <TableCell>{getStatusBadge(reg.status)}</TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setDeleteDialog({
+                                open: true,
+                                type: 'registration',
+                                id: reg.id,
+                                name: reg.name
+                              })}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ));
                     })()}
@@ -699,6 +805,18 @@ const Admin = () => {
                                   >
                                     Resend Email
                                   </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => setDeleteDialog({
+                                      open: true,
+                                      type: 'result',
+                                      id: result.id,
+                                      name: result.email
+                                    })}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 </>
                               )}
                             </div>
@@ -750,6 +868,25 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </section>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, type: null, id: null, name: '' })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus {deleteDialog.type === 'registration' ? 'registrasi' : 'hasil test'} untuk <strong>{deleteDialog.name}</strong>? 
+              Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
