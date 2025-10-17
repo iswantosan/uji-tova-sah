@@ -100,50 +100,56 @@ const Results = () => {
           }
         });
 
-        // Only send email automatically for regular users, NOT when viewing from admin
+        // Send email automatically for regular users, NOT when viewing from admin
         if (!adminViewData) {
-          try {
-            console.log('Attempting to send automatic email for:', session.email);
-            
-            const emailData = {
-              email: session.email,
-              name: session.name,
-              testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
-              duration: data.duration,
-              attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
-              impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
-              consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10))),
-              omissionErrors: data.omission_errors,
-              commissionErrors: data.commission_errors,
-              responseTime: Math.round(data.response_time),
-              variability: Math.round(data.variability)
-            };
+          setTimeout(async () => {
+            try {
+              console.log('Attempting to send automatic email for:', session.email);
+              
+              const emailData = {
+                email: session.email,
+                name: session.name,
+                testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
+                duration: data.duration,
+                attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
+                impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
+                consistency: Math.max(0, Math.min(100, 100 - (data.variability / 10))),
+                omissionErrors: data.omission_errors,
+                commissionErrors: data.commission_errors,
+                responseTime: Math.round(data.response_time),
+                variability: Math.round(data.variability)
+              };
 
-            console.log('Email data prepared for automatic send:', emailData);
+              console.log('Email data prepared for automatic send:', emailData);
 
-            const response = await supabase.functions.invoke('send-test-results', {
-              body: emailData
-            });
+              const response = await supabase.functions.invoke('send-test-results', {
+                body: emailData
+              });
 
-            console.log('Automatic email response:', response);
+              console.log('Automatic email response:', response);
 
-            if (response.error) {
-              throw response.error;
+              if (response.error) {
+                console.error('Email error:', response.error);
+                toast({
+                  title: "Peringatan",
+                  description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
+                  variant: "default"
+                });
+              } else {
+                toast({
+                  title: "Email Terkirim",
+                  description: "Hasil tes telah dikirim ke email Anda",
+                });
+              }
+            } catch (emailError) {
+              console.error('Error sending automatic email:', emailError);
+              toast({
+                title: "Peringatan",
+                description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
+                variant: "default"
+              });
             }
-
-            toast({
-              title: "Email Terkirim",
-              description: "Hasil tes telah dikirim ke email Anda",
-            });
-          } catch (emailError) {
-            console.error('Error sending automatic email:', emailError);
-            toast({
-              title: "Peringatan",
-              description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
-              variant: "default"
-            });
-            // Don't block the results page if email fails
-          }
+          }, 1000);
         }
       } catch (error) {
         console.error('Error:', error);
