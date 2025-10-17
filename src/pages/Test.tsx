@@ -160,14 +160,17 @@ const Test = () => {
         console.error('Error saving test results:', responseError);
         
         // Check if it's a duplicate payment_code error
-        const errorMessage = responseError?.message || responseError;
-        if (responseError?.code === '23505' || errorMessage?.includes('unique_payment_code')) {
+        const errorData = data?.error ? data : responseError;
+        const errorCode = errorData?.code || responseError?.code;
+        const errorMessage = errorData?.error || errorData?.message || responseError?.message;
+        
+        if (errorCode === '23505' || errorMessage?.includes('unique_payment_code') || errorMessage?.includes('duplicate key')) {
           toast({
-            title: "Test Sudah Pernah Dikerjakan",
-            description: "Kode pembayaran ini sudah digunakan untuk test sebelumnya. Hubungi admin jika ada masalah.",
+            title: "Kode Pembayaran Sudah Digunakan",
+            description: "Kode pembayaran ini sudah pernah dipakai. Silakan lihat hasil test sebelumnya atau hubungi admin.",
             variant: "destructive"
           });
-          // Still navigate to results to show existing result
+          // Navigate to results to try to show existing result
           setTimeout(() => {
             window.location.href = "/results";
           }, 2000);

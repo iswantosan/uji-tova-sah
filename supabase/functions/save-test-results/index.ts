@@ -59,9 +59,15 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('Error saving test results:', error);
+      
+      // Return error details for frontend to handle
       return new Response(
-        JSON.stringify({ error: error.message, code: error.code }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: error.message, 
+          code: error.code,
+          details: error.details 
+        }),
+        { status: error.code === '23505' ? 409 : 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
