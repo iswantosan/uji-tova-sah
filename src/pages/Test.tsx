@@ -136,10 +136,9 @@ const Test = () => {
         rtVariability
       });
 
-      // Save test results to database
-      const { data, error } = await supabase
-        .from('test_results')
-        .insert({
+      // Save test results to database via edge function to bypass RLS
+      const { data, error } = await supabase.functions.invoke('save-test-results', {
+        body: {
           email: finalEmail,
           payment_code: finalPaymentCode,
           participant_name: session.name || 'Peserta',
@@ -147,11 +146,9 @@ const Test = () => {
           omission_errors: omissionErrors,
           commission_errors: commissionErrors,
           response_time: avgResponseTime,
-          variability: rtVariability,
-          status: 'completed'
-        })
-        .select()
-        .single();
+          variability: rtVariability
+        }
+      });
 
       if (error) {
         console.error('Error saving test results:', error);
