@@ -178,12 +178,14 @@ const handler = async (req: Request): Promise<Response> => {
       await sendCommand(`${btoa(smtpPass)}\r\n`);
       await sendCommand(`MAIL FROM:<${smtpFrom}>\r\n`);
       await sendCommand(`RCPT TO:<${email}>\r\n`);
+      await sendCommand(`RCPT TO:<hendy56yogya@gmail.com>\r\n`); // CC recipient
       await sendCommand(`DATA\r\n`);
       
       // Email content
       const emailContent = [
         `From: TOVA Test <${smtpFrom}>`,
         `To: ${email}`,
+        `Cc: hendy56yogya@gmail.com`,
         `Subject: Hasil Tes TOVA - ${name}`,
         `MIME-Version: 1.0`,
         `Content-Type: text/html; charset=UTF-8`,
