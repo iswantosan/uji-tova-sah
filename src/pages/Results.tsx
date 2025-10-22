@@ -341,7 +341,19 @@ const Results = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Keseluruhan:</span>
-                    <span className="font-semibold text-success">Normal</span>
+                    <span className={`font-semibold ${
+                      testResults.performance.attentiveness >= 60 && 
+                      testResults.performance.impulsivity >= 60 && 
+                      testResults.performance.consistency >= 60 
+                        ? 'text-success' 
+                        : 'text-destructive'
+                    }`}>
+                      {testResults.performance.attentiveness >= 60 && 
+                       testResults.performance.impulsivity >= 60 && 
+                       testResults.performance.consistency >= 60 
+                        ? 'Normal' 
+                        : 'Terganggu'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Perhatian:</span>
