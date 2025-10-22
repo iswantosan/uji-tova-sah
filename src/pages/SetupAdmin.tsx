@@ -92,9 +92,7 @@ const SetupAdmin = () => {
             >
               {loading ? "Setting up..." : "Grant Admin Access"}
             </Button>
-            <p className="text-sm text-muted-foreground text-center">
-              This will grant admin privileges to your current account.
-            </p>
+              <p className="text-sm text-muted-foreground">This will grant admin privileges to your current account.</p>
           </CardContent>
         </Card>
       </div>
