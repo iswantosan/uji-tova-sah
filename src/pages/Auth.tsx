@@ -46,13 +46,13 @@ const Auth = () => {
       if (error) throw error;
 
       toast({
-        title: "Login berhasil!",
-        description: "Selamat datang di dashboard admin.",
+        title: "Login successful!",
+        description: "Welcome to the admin dashboard.",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Terjadi kesalahan, silakan coba lagi.",
+        description: error.message || "An error occurred, please try again.",
         variant: "destructive",
       });
     } finally {
@@ -67,7 +67,7 @@ const Auth = () => {
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4">
             <ArrowLeft className="h-4 w-4" />
-            Kembali ke Beranda
+            Back to Home
           </Link>
           <div className="flex items-center justify-center gap-2 mb-2">
             <Brain className="h-8 w-8 text-primary" />
@@ -78,9 +78,9 @@ const Auth = () => {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle>Login Admin</CardTitle>
+            <CardTitle>Admin Login</CardTitle>
             <CardDescription>
-              Masuk ke dashboard admin
+              Login to admin dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -109,7 +109,7 @@ const Auth = () => {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Masuk..." : "Masuk"}
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
           </CardContent>
