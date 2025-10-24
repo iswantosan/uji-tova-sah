@@ -144,7 +144,7 @@ const Admin = () => {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to retrieve data from database",
+        description: "Gagal mengambil data dari database",
         variant: "destructive"
       });
     } finally {
@@ -170,14 +170,14 @@ const Admin = () => {
       ));
 
       toast({
-        title: "Payment Approved",
-        description: "Participant can now access the TOVA test",
+        title: "Pembayaran Disetujui",
+        description: "Peserta sekarang dapat mengakses tes TOVA",
       });
     } catch (error) {
       console.error('Error approving payment:', error);
       toast({
         title: "Error",
-        description: "Failed to approve payment",
+        description: "Gagal menyetujui pembayaran",
         variant: "destructive"
       });
     }
@@ -201,15 +201,15 @@ const Admin = () => {
       ));
 
       toast({
-        title: "Payment Rejected",
-        description: "Participant will be notified to resubmit proof of payment",
+        title: "Pembayaran Ditolak",
+        description: "Peserta akan diberitahu untuk mengirim ulang bukti pembayaran",
         variant: "destructive"
       });
     } catch (error) {
       console.error('Error rejecting payment:', error);
       toast({
         title: "Error",
-        description: "Failed to reject payment",
+        description: "Gagal menolak pembayaran",
         variant: "destructive"
       });
     }
@@ -256,14 +256,14 @@ const Admin = () => {
       }
 
       toast({
-        title: "Email Sent",
-        description: `Test results successfully resent to ${result.email}`,
+        title: "Email Terkirim",
+        description: `Hasil tes berhasil dikirim ulang ke ${result.email}`,
       });
     } catch (error) {
       console.error('Error resending email:', error);
       toast({
         title: "Error",
-        description: "Failed to resend test results email",
+        description: "Gagal mengirim ulang email hasil tes",
         variant: "destructive"
       });
     }
@@ -281,8 +281,8 @@ const Admin = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Registration successfully deleted",
+        title: "Berhasil",
+        description: "Registrasi berhasil dihapus",
       });
 
       // Refresh data
@@ -291,7 +291,7 @@ const Admin = () => {
       console.error('Error deleting registration:', error);
       toast({
         title: "Error",
-        description: "Failed to delete registration",
+        description: "Gagal menghapus registrasi",
         variant: "destructive"
       });
     } finally {
@@ -311,8 +311,8 @@ const Admin = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Test result successfully deleted",
+        title: "Berhasil",
+        description: "Hasil test berhasil dihapus",
       });
 
       // Refresh data
@@ -321,7 +321,7 @@ const Admin = () => {
       console.error('Error deleting test result:', error);
       toast({
         title: "Error",
-        description: "Failed to delete test result",
+        description: "Gagal menghapus hasil test",
         variant: "destructive"
       });
     } finally {
@@ -370,11 +370,11 @@ const Admin = () => {
       case "pending":
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
       case "approved":
-        return <Badge className="bg-success"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
+        return <Badge className="bg-success"><CheckCircle className="h-3 w-3 mr-1" />Disetujui</Badge>;
       case "rejected":
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Ditolak</Badge>;
       case "completed":
-        return <Badge className="bg-blue-600"><FileText className="h-3 w-3 mr-1" />Completed</Badge>;
+        return <Badge className="bg-blue-600"><FileText className="h-3 w-3 mr-1" />Selesai</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -420,7 +420,7 @@ const Admin = () => {
               <Button variant="outline" asChild>
                 <Link to="/" className="flex items-center space-x-2">
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Back</span>
+                  <span>Kembali</span>
                 </Link>
               </Button>
             </div>
@@ -434,20 +434,20 @@ const Admin = () => {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Total Registrations</CardDescription>
+              <CardDescription>Total Registrasi</CardDescription>
               <CardTitle className="text-3xl">{registrations.length}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Registered participants</span>
+                <span className="text-sm text-muted-foreground">Peserta terdaftar</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Pending Payments</CardDescription>
+              <CardDescription>Pembayaran Pending</CardDescription>
               <CardTitle className="text-3xl">
                 {payments.filter(p => p.status === 'pending').length}
               </CardTitle>
@@ -455,14 +455,14 @@ const Admin = () => {
             <CardContent>
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 text-warning" />
-                <span className="text-sm text-muted-foreground">Awaiting verification</span>
+                <span className="text-sm text-muted-foreground">Menunggu verifikasi</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Approved Payments</CardDescription>
+              <CardDescription>Pembayaran Disetujui</CardDescription>
               <CardTitle className="text-3xl">
                 {payments.filter(p => p.status === 'approved').length}
               </CardTitle>
@@ -470,20 +470,20 @@ const Admin = () => {
             <CardContent>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-success" />
-                <span className="text-sm text-muted-foreground">Ready to test</span>
+                <span className="text-sm text-muted-foreground">Siap tes</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Tests Completed</CardDescription>
+              <CardDescription>Tes Selesai</CardDescription>
               <CardTitle className="text-3xl">{testResults.length}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">Results available</span>
+                <span className="text-sm text-muted-foreground">Hasil tersedia</span>
               </div>
             </CardContent>
           </Card>
@@ -492,18 +492,18 @@ const Admin = () => {
         {/* Tabs */}
         <Tabs defaultValue="registrations" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="registrations">Registrations</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="results">Test Results</TabsTrigger>
+            <TabsTrigger value="registrations">Registrasi</TabsTrigger>
+            <TabsTrigger value="payments">Pembayaran</TabsTrigger>
+            <TabsTrigger value="results">Hasil Tes</TabsTrigger>
           </TabsList>
 
           {/* Registrations Tab */}
           <TabsContent value="registrations">
             <Card>
               <CardHeader>
-                <CardTitle>Registration List</CardTitle>
+                <CardTitle>Daftar Registrasi</CardTitle>
                 <CardDescription>
-                  Manage TOVA test participant registrations
+                  Kelola registrasi peserta tes TOVA
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -511,7 +511,7 @@ const Admin = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search by name, email, or phone..."
+                      placeholder="Cari berdasarkan nama, email, atau telepon..."
                       value={searchTerms.registrations}
                       onChange={(e) => handleSearch('registrations', e.target.value)}
                       className="pl-9"
@@ -522,11 +522,11 @@ const Admin = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
+                      <TableHead>Nama</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Age</TableHead>
-                      <TableHead>Date</TableHead>
+                      <TableHead>Telepon</TableHead>
+                      <TableHead>Usia</TableHead>
+                      <TableHead>Tanggal</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -563,7 +563,7 @@ const Admin = () => {
                   return totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-sm text-muted-foreground">
-                        Page {currentPage.registrations} of {totalPages}
+                        Halaman {currentPage.registrations} dari {totalPages}
                       </p>
                       <div className="flex space-x-2">
                         <Button
@@ -596,9 +596,9 @@ const Admin = () => {
           <TabsContent value="payments">
             <Card>
               <CardHeader>
-                <CardTitle>Payment Verification</CardTitle>
+                <CardTitle>Verifikasi Pembayaran</CardTitle>
                 <CardDescription>
-                  Manage and verify participant payments
+                  Kelola dan verifikasi pembayaran peserta
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -606,7 +606,7 @@ const Admin = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search by email or payment code..."
+                      placeholder="Cari berdasarkan email atau kode pembayaran..."
                       value={searchTerms.payments}
                       onChange={(e) => handleSearch('payments', e.target.value)}
                       className="pl-9"
@@ -618,10 +618,10 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
-                      <TableHead>Payment Code</TableHead>
-                      <TableHead>Date</TableHead>
+                      <TableHead>Kode Pembayaran</TableHead>
+                      <TableHead>Tanggal</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
+                      <TableHead>Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -646,14 +646,14 @@ const Admin = () => {
                                   onClick={() => handleApprovePayment(payment.id)}
                                   className="bg-success hover:bg-success/90"
                                 >
-                                  Approve
+                                  Setujui
                                 </Button>
                                 <Button 
                                   size="sm" 
                                   variant="destructive"
                                   onClick={() => handleRejectPayment(payment.id)}
                                 >
-                                  Reject
+                                  Tolak
                                 </Button>
                               </div>
                             )}
@@ -675,7 +675,7 @@ const Admin = () => {
                   return totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-sm text-muted-foreground">
-                        Page {currentPage.payments} of {totalPages}
+                        Halaman {currentPage.payments} dari {totalPages}
                       </p>
                       <div className="flex space-x-2">
                         <Button
@@ -708,9 +708,9 @@ const Admin = () => {
           <TabsContent value="results">
             <Card>
               <CardHeader>
-                <CardTitle>TOVA Test Results</CardTitle>
+                <CardTitle>Hasil Tes TOVA</CardTitle>
                 <CardDescription>
-                  View completed test results
+                  Lihat hasil tes yang telah diselesaikan
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -718,7 +718,7 @@ const Admin = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search by email or payment code..."
+                      placeholder="Cari berdasarkan email atau kode pembayaran..."
                       value={searchTerms.results}
                       onChange={(e) => handleSearch('results', e.target.value)}
                       className="pl-9"
@@ -730,15 +730,15 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Test Date</TableHead>
-                      <TableHead>Duration</TableHead>
+                      <TableHead>Kode</TableHead>
+                      <TableHead>Tanggal Tes</TableHead>
+                      <TableHead>Durasi</TableHead>
                       <TableHead>Omission</TableHead>
                       <TableHead>Commission</TableHead>
                       <TableHead>RT (ms)</TableHead>
                       <TableHead>Variability</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
+                      <TableHead>Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -823,7 +823,7 @@ const Admin = () => {
                   return totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-sm text-muted-foreground">
-                        Page {currentPage.results} of {totalPages}
+                        Halaman {currentPage.results} dari {totalPages}
                       </p>
                       <div className="flex space-x-2">
                         <Button
@@ -858,16 +858,16 @@ const Admin = () => {
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, type: null, id: null, name: '' })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Confirmation</AlertDialogTitle>
+            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {deleteDialog.type === 'registration' ? 'registration' : 'test result'} for <strong>{deleteDialog.name}</strong>? 
-              This action cannot be undone.
+              Apakah Anda yakin ingin menghapus {deleteDialog.type === 'registration' ? 'registrasi' : 'hasil test'} untuk <strong>{deleteDialog.name}</strong>? 
+              Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
-              Delete
+              Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

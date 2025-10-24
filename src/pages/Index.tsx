@@ -16,7 +16,7 @@ const Index = () => {
             </div>
             <div className="space-x-4">
               <Button asChild>
-                <Link to="/register">Register Now</Link>
+                <Link to="/register">Daftar Sekarang</Link>
               </Button>
             </div>
           </div>
@@ -30,16 +30,16 @@ const Index = () => {
             Test of Variables of Attention
           </h2>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            The TOVA test is a reliable diagnostic tool for measuring attention 
-            and concentration abilities. Our system provides a secure 
-            and professional platform for conducting ADHD tests online.
+            Tes TOVA adalah alat diagnostik yang terpercaya untuk mengukur kemampuan 
+            perhatian dan konsentrasi. Sistem kami menyediakan platform yang aman 
+            dan terprofesional untuk melakukan tes ADHD secara online.
           </p>
           <div className="space-x-4">
             <Button size="lg" className="px-8 py-4 text-lg" asChild>
-              <Link to="/register">Start Registration</Link>
+              <Link to="/register">Mulai Registrasi</Link>
             </Button>
             <Button size="lg" variant="outline" className="px-8 py-4 text-lg" asChild>
-              <Link to="/test-access">Access Test</Link>
+              <Link to="/test-access">Akses Tes</Link>
             </Button>
           </div>
         </div>
@@ -49,10 +49,10 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h3 className="text-3xl font-bold text-gray-900 mb-4">
-            Why Choose TOVA Test?
+            Mengapa Memilih TOVA Test?
           </h3>
           <p className="text-lg text-gray-600">
-            Trusted ADHD testing platform with cutting-edge technology
+            Platform tes ADHD terpercaya dengan teknologi terdepan
           </p>
         </div>
         
@@ -60,11 +60,11 @@ const Index = () => {
           <Card className="text-center hover:shadow-lg transition-shadow">
             <CardHeader>
               <Brain className="h-12 w-12 text-primary mx-auto mb-4" />
-              <CardTitle>Accredited Test</CardTitle>
+              <CardTitle>Tes Terakreditasi</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Using internationally recognized and tested TOVA standards
+                Menggunakan standar TOVA yang telah teruji dan diakui secara internasional
               </CardDescription>
             </CardContent>
           </Card>
@@ -72,11 +72,11 @@ const Index = () => {
           <Card className="text-center hover:shadow-lg transition-shadow">
             <CardHeader>
               <Shield className="h-12 w-12 text-success mx-auto mb-4" />
-              <CardTitle>Safe & Private</CardTitle>
+              <CardTitle>Aman & Privat</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Test participant data is protected with enterprise-level encryption
+                Data peserta tes dilindungi dengan enkripsi tingkat enterprise
               </CardDescription>
             </CardContent>
           </Card>
@@ -84,11 +84,11 @@ const Index = () => {
           <Card className="text-center hover:shadow-lg transition-shadow">
             <CardHeader>
               <Clock className="h-12 w-12 text-warning mx-auto mb-4" />
-              <CardTitle>Fast Results</CardTitle>
+              <CardTitle>Hasil Cepat</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Test results are available immediately after completing the testing session
+                Hasil tes tersedia langsung setelah menyelesaikan sesi testing
               </CardDescription>
             </CardContent>
           </Card>
@@ -100,7 +100,7 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Technical support team ready to help you anytime
+                Tim dukungan teknis siap membantu Anda kapan saja
               </CardDescription>
             </CardContent>
           </Card>
@@ -111,13 +111,13 @@ const Index = () => {
       <section className="bg-primary text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h3 className="text-3xl font-bold mb-4">
-            Ready to Start the TOVA Test?
+            Siap Memulai Tes TOVA?
           </h3>
           <p className="text-xl mb-8 opacity-90">
-            Register now and get access to a professional ADHD testing platform
+            Daftar sekarang dan dapatkan akses ke platform tes ADHD terprofesional
           </p>
           <Button size="lg" variant="secondary" className="px-8 py-4 text-lg" asChild>
-            <Link to="/register">Register Now</Link>
+            <Link to="/register">Daftar Sekarang</Link>
           </Button>
         </div>
       </section>
@@ -130,7 +130,7 @@ const Index = () => {
             <span className="text-lg font-semibold">TOVA Test</span>
           </div>
           <p className="text-gray-400">
-            © 2025 TOVA Test Platform. All rights reserved.
+            © 2025 TOVA Test Platform. Semua hak cipta dilindungi.
           </p>
         </div>
       </footer>

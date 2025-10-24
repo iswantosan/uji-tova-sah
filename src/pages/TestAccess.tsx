@@ -22,7 +22,7 @@ const TestAccess = () => {
     if (!formData.email) {
       toast({
         title: "Error",
-        description: "Please enter email",
+        description: "Harap masukkan email",
         variant: "destructive"
       });
       return;
@@ -50,8 +50,8 @@ const TestAccess = () => {
 
       if (!registrations || registrations.length === 0) {
         toast({
-          title: "Email Not Found",
-          description: "Email not registered yet. Please register first.",
+          title: "Email Tidak Ditemukan",
+          description: "Email belum terdaftar. Silakan daftar terlebih dahulu.",
           variant: "destructive"
         });
         return;
@@ -69,7 +69,7 @@ const TestAccess = () => {
         console.error('Payment check error:', paymentError);
         toast({
           title: "Error",
-          description: "An error occurred while checking payment status.",
+          description: "Terjadi kesalahan saat memeriksa status pembayaran.",
           variant: "destructive"
         });
         return;
@@ -77,8 +77,8 @@ const TestAccess = () => {
 
       if (!payments || payments.length === 0) {
         toast({
-          title: "Payment Not Yet Approved",
-          description: "Your payment has not been approved by admin yet. Please wait or contact admin.",
+          title: "Pembayaran Belum Disetujui",
+          description: "Pembayaran Anda belum disetujui oleh admin. Silakan tunggu atau hubungi admin.",
           variant: "destructive"
         });
         return;
@@ -92,15 +92,15 @@ const TestAccess = () => {
       }));
 
       toast({
-        title: "Access Approved!",
-        description: "Good luck with the TOVA test!",
+        title: "Akses Disetujui!",
+        description: "Selamat mengerjakan tes TOVA!",
       });
       window.location.href = "/test";
     } catch (error) {
       console.error('Error verifying access:', error);
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: "Terjadi kesalahan. Silakan coba lagi.",
         variant: "destructive"
       });
     } finally {
@@ -128,7 +128,7 @@ const TestAccess = () => {
             <Button variant="secondary" asChild>
               <Link to="/" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
-                <span>Back</span>
+                <span>Kembali</span>
               </Link>
             </Button>
           </div>
@@ -141,57 +141,57 @@ const TestAccess = () => {
           <div className="text-center mb-8">
             <Lock className="h-16 w-16 text-primary mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Access TOVA Test
+              Akses Tes TOVA
             </h2>
             <p className="text-lg text-gray-600">
-              Enter your registered email to start the test
+              Masukkan email terdaftar untuk memulai tes
             </p>
           </div>
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Access Verification</CardTitle>
+              <CardTitle>Verifikasi Akses</CardTitle>
               <CardDescription>
-                Enter your registered email to access the test
+                Masukkan email yang sudah terdaftar untuk mengakses tes
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                    <Label htmlFor="email">Registered Email *</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="example@email.com"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                  <Label htmlFor="email">Email Terdaftar *</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="contoh@email.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
 
-                  <Alert>
-                    <AlertDescription>
-                      Make sure the email entered is the same as during registration.
-                    </AlertDescription>
-                  </Alert>
+                <Alert>
+                  <AlertDescription>
+                    Pastikan email yang dimasukkan sama dengan saat registrasi.
+                  </AlertDescription>
+                </Alert>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    size="lg"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Verifying..." : "Start Test"}
-                  </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  size="lg"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Memverifikasi..." : "Mulai Tes"}
+                </Button>
               </form>
 
               <div className="mt-6 pt-6 border-t text-center">
                 <p className="text-sm text-gray-600 mb-4">
-                  Not registered yet?
+                  Belum terdaftar?
                 </p>
                 <Button variant="outline" asChild>
-                  <Link to="/register">Register Now</Link>
+                  <Link to="/register">Daftar Sekarang</Link>
                 </Button>
               </div>
             </CardContent>
@@ -200,10 +200,10 @@ const TestAccess = () => {
           <div className="mt-6">
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
-                <h4 className="font-semibold text-blue-900 mb-2">Help:</h4>
+                <h4 className="font-semibold text-blue-900 mb-2">Bantuan:</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Make sure the email entered is the same as during registration</li>
-                  <li>• Contact admin if you have access difficulties</li>
+                  <li>• Pastikan email yang dimasukkan sama dengan saat registrasi</li>
+                  <li>• Hubungi admin jika mengalami kesulitan akses</li>
                 </ul>
               </CardContent>
             </Card>
