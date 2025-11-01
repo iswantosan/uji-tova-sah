@@ -144,7 +144,7 @@ const Admin = () => {
       console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Gagal mengambil data dari database",
+        description: "Failed to fetch data from database",
         variant: "destructive"
       });
     } finally {
@@ -170,14 +170,14 @@ const Admin = () => {
       ));
 
       toast({
-        title: "Pembayaran Disetujui",
-        description: "Peserta sekarang dapat mengakses tes TOVA",
+        title: "Payment Approved",
+        description: "Participant can now access the TOVA test",
       });
     } catch (error) {
       console.error('Error approving payment:', error);
       toast({
         title: "Error",
-        description: "Gagal menyetujui pembayaran",
+        description: "Failed to approve payment",
         variant: "destructive"
       });
     }
@@ -201,15 +201,15 @@ const Admin = () => {
       ));
 
       toast({
-        title: "Pembayaran Ditolak",
-        description: "Peserta akan diberitahu untuk mengirim ulang bukti pembayaran",
+        title: "Payment Rejected",
+        description: "Participant will be notified to resend payment proof",
         variant: "destructive"
       });
     } catch (error) {
       console.error('Error rejecting payment:', error);
       toast({
         title: "Error",
-        description: "Gagal menolak pembayaran",
+        description: "Failed to reject payment",
         variant: "destructive"
       });
     }
@@ -227,7 +227,7 @@ const Admin = () => {
       
       // Get participant name from registrations
       const registration = registrations.find(r => r.email === result.email);
-      const participantName = registration?.name || 'Peserta';
+      const participantName = registration?.name || 'Participant';
 
       const emailData = {
         email: result.email,
@@ -256,14 +256,14 @@ const Admin = () => {
       }
 
       toast({
-        title: "Email Terkirim",
-        description: `Hasil tes berhasil dikirim ulang ke ${result.email}`,
+        title: "Email Sent",
+        description: `Test results successfully resent to ${result.email}`,
       });
     } catch (error) {
       console.error('Error resending email:', error);
       toast({
         title: "Error",
-        description: "Gagal mengirim ulang email hasil tes",
+        description: "Failed to resend test results email",
         variant: "destructive"
       });
     }
@@ -281,8 +281,8 @@ const Admin = () => {
       if (error) throw error;
 
       toast({
-        title: "Berhasil",
-        description: "Registrasi berhasil dihapus",
+        title: "Success",
+        description: "Registration deleted successfully",
       });
 
       // Refresh data
@@ -291,7 +291,7 @@ const Admin = () => {
       console.error('Error deleting registration:', error);
       toast({
         title: "Error",
-        description: "Gagal menghapus registrasi",
+        description: "Failed to delete registration",
         variant: "destructive"
       });
     } finally {
@@ -311,8 +311,8 @@ const Admin = () => {
       if (error) throw error;
 
       toast({
-        title: "Berhasil",
-        description: "Hasil test berhasil dihapus",
+        title: "Success",
+        description: "Test result deleted successfully",
       });
 
       // Refresh data
@@ -321,7 +321,7 @@ const Admin = () => {
       console.error('Error deleting test result:', error);
       toast({
         title: "Error",
-        description: "Gagal menghapus hasil test",
+        description: "Failed to delete test result",
         variant: "destructive"
       });
     } finally {
@@ -370,11 +370,11 @@ const Admin = () => {
       case "pending":
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
       case "approved":
-        return <Badge className="bg-success"><CheckCircle className="h-3 w-3 mr-1" />Disetujui</Badge>;
+        return <Badge className="bg-success"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
       case "rejected":
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Ditolak</Badge>;
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
       case "completed":
-        return <Badge className="bg-blue-600"><FileText className="h-3 w-3 mr-1" />Selesai</Badge>;
+        return <Badge className="bg-blue-600"><FileText className="h-3 w-3 mr-1" />Completed</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -420,7 +420,7 @@ const Admin = () => {
               <Button variant="outline" asChild>
                 <Link to="/" className="flex items-center space-x-2">
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Kembali</span>
+                  <span>Back</span>
                 </Link>
               </Button>
             </div>
@@ -434,20 +434,20 @@ const Admin = () => {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Total Registrasi</CardDescription>
+              <CardDescription>Total Registrations</CardDescription>
               <CardTitle className="text-3xl">{registrations.length}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Peserta terdaftar</span>
+                <span className="text-sm text-muted-foreground">Registered participants</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Pembayaran Pending</CardDescription>
+              <CardDescription>Pending Payments</CardDescription>
               <CardTitle className="text-3xl">
                 {payments.filter(p => p.status === 'pending').length}
               </CardTitle>
@@ -455,14 +455,14 @@ const Admin = () => {
             <CardContent>
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4 text-warning" />
-                <span className="text-sm text-muted-foreground">Menunggu verifikasi</span>
+                <span className="text-sm text-muted-foreground">Awaiting verification</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Pembayaran Disetujui</CardDescription>
+              <CardDescription>Approved Payments</CardDescription>
               <CardTitle className="text-3xl">
                 {payments.filter(p => p.status === 'approved').length}
               </CardTitle>
@@ -470,20 +470,20 @@ const Admin = () => {
             <CardContent>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-success" />
-                <span className="text-sm text-muted-foreground">Siap tes</span>
+                <span className="text-sm text-muted-foreground">Ready for test</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Tes Selesai</CardDescription>
+              <CardDescription>Completed Tests</CardDescription>
               <CardTitle className="text-3xl">{testResults.length}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center space-x-2">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm text-muted-foreground">Hasil tersedia</span>
+                <span className="text-sm text-muted-foreground">Results available</span>
               </div>
             </CardContent>
           </Card>
@@ -492,18 +492,18 @@ const Admin = () => {
         {/* Tabs */}
         <Tabs defaultValue="registrations" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="registrations">Registrasi</TabsTrigger>
-            <TabsTrigger value="payments">Pembayaran</TabsTrigger>
-            <TabsTrigger value="results">Hasil Tes</TabsTrigger>
+            <TabsTrigger value="registrations">Registrations</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="results">Test Results</TabsTrigger>
           </TabsList>
 
           {/* Registrations Tab */}
           <TabsContent value="registrations">
             <Card>
               <CardHeader>
-                <CardTitle>Daftar Registrasi</CardTitle>
+                <CardTitle>Registration List</CardTitle>
                 <CardDescription>
-                  Kelola registrasi peserta tes TOVA
+                  Manage TOVA test participant registrations
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -511,7 +511,7 @@ const Admin = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Cari berdasarkan nama, email, atau telepon..."
+                      placeholder="Search by name, email, or phone..."
                       value={searchTerms.registrations}
                       onChange={(e) => handleSearch('registrations', e.target.value)}
                       className="pl-9"
@@ -522,11 +522,11 @@ const Admin = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nama</TableHead>
+                      <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Telepon</TableHead>
-                      <TableHead>Usia</TableHead>
-                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Age</TableHead>
+                      <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -544,7 +544,7 @@ const Admin = () => {
                           <TableCell>{reg.email}</TableCell>
                           <TableCell>{reg.phone}</TableCell>
                           <TableCell>{reg.age}</TableCell>
-                          <TableCell>{new Date(reg.created_at).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>{new Date(reg.created_at).toLocaleDateString('en-US')}</TableCell>
                           <TableCell>{getStatusBadge(reg.status)}</TableCell>
                         </TableRow>
                       ));
@@ -563,7 +563,7 @@ const Admin = () => {
                   return totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-sm text-muted-foreground">
-                        Halaman {currentPage.registrations} dari {totalPages}
+                        Page {currentPage.registrations} of {totalPages}
                       </p>
                       <div className="flex space-x-2">
                         <Button
@@ -596,9 +596,9 @@ const Admin = () => {
           <TabsContent value="payments">
             <Card>
               <CardHeader>
-                <CardTitle>Verifikasi Pembayaran</CardTitle>
+                <CardTitle>Payment Verification</CardTitle>
                 <CardDescription>
-                  Kelola dan verifikasi pembayaran peserta
+                  Manage and verify participant payments
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -606,7 +606,7 @@ const Admin = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Cari berdasarkan email atau kode pembayaran..."
+                      placeholder="Search by email or payment code..."
                       value={searchTerms.payments}
                       onChange={(e) => handleSearch('payments', e.target.value)}
                       className="pl-9"
@@ -618,10 +618,10 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
-                      <TableHead>Kode Pembayaran</TableHead>
-                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Payment Code</TableHead>
+                      <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Aksi</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -636,7 +636,7 @@ const Admin = () => {
                         <TableRow key={payment.id}>
                           <TableCell>{payment.email}</TableCell>
                           <TableCell className="font-mono">{payment.payment_code}</TableCell>
-                          <TableCell>{new Date(payment.created_at).toLocaleDateString('id-ID')}</TableCell>
+                          <TableCell>{new Date(payment.created_at).toLocaleDateString('en-US')}</TableCell>
                           <TableCell>{getStatusBadge(payment.status)}</TableCell>
                           <TableCell>
                             {payment.status === 'pending' && (
@@ -646,14 +646,14 @@ const Admin = () => {
                                   onClick={() => handleApprovePayment(payment.id)}
                                   className="bg-success hover:bg-success/90"
                                 >
-                                  Setujui
+                                  Approve
                                 </Button>
                                 <Button 
                                   size="sm" 
                                   variant="destructive"
                                   onClick={() => handleRejectPayment(payment.id)}
                                 >
-                                  Tolak
+                                  Reject
                                 </Button>
                               </div>
                             )}
@@ -675,7 +675,7 @@ const Admin = () => {
                   return totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-sm text-muted-foreground">
-                        Halaman {currentPage.payments} dari {totalPages}
+                        Page {currentPage.payments} of {totalPages}
                       </p>
                       <div className="flex space-x-2">
                         <Button
@@ -708,9 +708,9 @@ const Admin = () => {
           <TabsContent value="results">
             <Card>
               <CardHeader>
-                <CardTitle>Hasil Tes TOVA</CardTitle>
+                <CardTitle>TOVA Test Results</CardTitle>
                 <CardDescription>
-                  Lihat hasil tes yang telah diselesaikan
+                  View completed test results
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -718,7 +718,7 @@ const Admin = () => {
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Cari berdasarkan email atau kode pembayaran..."
+                      placeholder="Search by email or payment code..."
                       value={searchTerms.results}
                       onChange={(e) => handleSearch('results', e.target.value)}
                       className="pl-9"
@@ -730,15 +730,15 @@ const Admin = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
-                      <TableHead>Kode</TableHead>
-                      <TableHead>Tanggal Tes</TableHead>
-                      <TableHead>Durasi</TableHead>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Test Date</TableHead>
+                      <TableHead>Duration</TableHead>
                       <TableHead>Omission</TableHead>
                       <TableHead>Commission</TableHead>
                       <TableHead>RT (ms)</TableHead>
                       <TableHead>Variability</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Aksi</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -754,13 +754,13 @@ const Admin = () => {
                           <TableCell>{result.email}</TableCell>
                           <TableCell className="font-mono">{result.payment_code}</TableCell>
                           <TableCell>
-                            {new Date(result.test_date).toLocaleDateString('id-ID', {
+                            {new Date(result.test_date).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: '2-digit',
                               day: '2-digit'
                             })}
                             {' '}
-                            {new Date(result.test_date).toLocaleTimeString('id-ID', {
+                            {new Date(result.test_date).toLocaleTimeString('en-US', {
                               hour: '2-digit',
                               minute: '2-digit'
                             })}
@@ -823,7 +823,7 @@ const Admin = () => {
                   return totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">
                       <p className="text-sm text-muted-foreground">
-                        Halaman {currentPage.results} dari {totalPages}
+                        Page {currentPage.results} of {totalPages}
                       </p>
                       <div className="flex space-x-2">
                         <Button
@@ -858,16 +858,16 @@ const Admin = () => {
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, type: null, id: null, name: '' })}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus {deleteDialog.type === 'registration' ? 'registrasi' : 'hasil test'} untuk <strong>{deleteDialog.name}</strong>? 
-              Tindakan ini tidak dapat dibatalkan.
+              Are you sure you want to delete this {deleteDialog.type === 'registration' ? 'registration' : 'test result'} for <strong>{deleteDialog.name}</strong>? 
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
-              Hapus
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
