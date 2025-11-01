@@ -27,7 +27,7 @@ const Register = () => {
     if (!formData.name || !formData.email || !formData.phone || !formData.age) {
       toast({
         title: "Error",
-        description: "Harap lengkapi semua field yang wajib",
+        description: "Please complete all required fields",
         variant: "destructive"
       });
       return;
@@ -36,7 +36,7 @@ const Register = () => {
     if (parseInt(formData.age) < 6 || parseInt(formData.age) > 65) {
       toast({
         title: "Error", 
-        description: "Usia harus antara 6-65 tahun",
+        description: "Age must be between 6-65 years",
         variant: "destructive"
       });
       return;
@@ -64,7 +64,7 @@ const Register = () => {
         if (regError.code === '23505') { // Unique constraint violation
           toast({
             title: "Error",
-            description: "Email sudah terdaftar",
+            description: "Email already registered",
             variant: "destructive"
           });
         } else {
@@ -94,8 +94,8 @@ const Register = () => {
       }));
 
       toast({
-        title: "Registrasi Berhasil!",
-        description: "Kami akan memverifikasi registrasi Anda. Silakan lanjutkan ke pembayaran.",
+        title: "Registration Successful!",
+        description: "We will verify your registration. Please proceed to payment.",
         duration: 4000
       });
 
@@ -106,7 +106,7 @@ const Register = () => {
       console.error('Error registering:', error);
       toast({
         title: "Error",
-        description: "Terjadi kesalahan saat registrasi. Silakan coba lagi.",
+        description: "An error occurred during registration. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -135,7 +135,7 @@ const Register = () => {
             <Button variant="secondary" asChild>
               <Link to="/" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
-                <span>Kembali</span>
+                <span>Back</span>
               </Link>
             </Button>
           </div>
@@ -147,42 +147,42 @@ const Register = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Registrasi Peserta Tes TOVA
+              TOVA Test Participant Registration
             </h2>
             <p className="text-lg text-gray-600">
-              Lengkapi data diri Anda untuk memulai proses registrasi
+              Complete your information to begin the registration process
             </p>
           </div>
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Data Peserta</CardTitle>
+              <CardTitle>Participant Data</CardTitle>
               <CardDescription>
-                Pastikan semua informasi yang Anda masukkan sudah benar
+                Ensure all information you enter is correct
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nama Lengkap *</Label>
+                    <Label htmlFor="name">Full Name *</Label>
                     <Input
                       id="name"
                       name="name"
                       type="text"
-                      placeholder="Masukkan nama lengkap"
+                      placeholder="Enter full name"
                       value={formData.name}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="age">Usia *</Label>
+                    <Label htmlFor="age">Age *</Label>
                     <Input
                       id="age"
                       name="age"
                       type="number"
-                      placeholder="Masukkan usia"
+                      placeholder="Enter age"
                       value={formData.age}
                       onChange={handleInputChange}
                       required
@@ -196,7 +196,7 @@ const Register = () => {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="contoh@email.com"
+                    placeholder="example@email.com"
                     value={formData.email}
                     onChange={handleInputChange}
                     required
@@ -204,7 +204,7 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Nomor Telepon *</Label>
+                  <Label htmlFor="phone">Phone Number *</Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -217,29 +217,29 @@ const Register = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="purpose">Tujuan Tes</Label>
+                  <Label htmlFor="purpose">Test Purpose</Label>
                   <Input
                     id="purpose"
                     name="purpose"
                     type="text"
-                    placeholder="Contoh: Diagnosa ADHD, Evaluasi konsentrasi, dll"
+                    placeholder="Example: ADHD diagnosis, Concentration evaluation, etc"
                     value={formData.purpose}
                     onChange={handleInputChange}
                   />
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Proses Registrasi:</h4>
+                  <h4 className="font-semibold text-blue-900 mb-2">Registration Process:</h4>
                   <ul className="text-sm text-blue-800 space-y-1">
-                    <li>1. Lengkapi formulir registrasi</li>
-                    <li>2. Kami akan memverifikasi data Anda</li>
-                    <li>3. Lakukan pembayaran sesuai instruksi</li>
-                    <li>4. Tunggu persetujuan admin untuk mulai tes</li>
+                    <li>1. Complete registration form</li>
+                    <li>2. We will verify your data</li>
+                    <li>3. Make payment as instructed</li>
+                    <li>4. Wait for admin approval to start test</li>
                   </ul>
                 </div>
 
                 <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                  {isLoading ? "Mendaftar..." : "Daftar & Lanjut Pembayaran"}
+                  {isLoading ? "Registering..." : "Register & Proceed to Payment"}
                 </Button>
               </form>
             </CardContent>
