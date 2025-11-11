@@ -18,7 +18,7 @@ const Payment = () => {
     if (!email) {
       toast({
         title: "Error",
-        description: "Masukkan email terlebih dahulu",
+        description: "Please enter your email",
         variant: "destructive"
       });
       return;
@@ -37,7 +37,7 @@ const Payment = () => {
       if (paymentError || !payment) {
         toast({
           title: "Error",
-          description: "Email tidak ditemukan atau belum terdaftar.",
+          description: "Email not found or not yet registered.",
           variant: "destructive"
         });
         return;
@@ -46,14 +46,14 @@ const Payment = () => {
       setPaymentData(payment);
       
       toast({
-        title: "Data Ditemukan!",
-        description: "Informasi pembayaran Anda telah ditemukan.",
+        title: "Data Found!",
+        description: "Your payment information has been found.",
       });
     } catch (error) {
       console.error('Error checking payment:', error);
       toast({
         title: "Error",
-        description: "Terjadi kesalahan. Silakan coba lagi.",
+        description: "An error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -74,7 +74,7 @@ const Payment = () => {
             <Button variant="outline" asChild>
               <Link to="/register" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
-                <span>Kembali</span>
+                <span>Back</span>
               </Link>
             </Button>
           </div>
@@ -86,19 +86,19 @@ const Payment = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Status Registrasi & Pembayaran
+              Registration & Payment Status
             </h2>
             <p className="text-lg text-gray-600">
-              Cek status registrasi dan kode pembayaran Anda
+              Check your registration status and payment code
             </p>
           </div>
 
           {!paymentData ? (
             <Card className="shadow-lg mb-6">
               <CardHeader>
-                <CardTitle>Cek Status Registrasi</CardTitle>
+                <CardTitle>Check Registration Status</CardTitle>
                 <CardDescription>
-                  Masukkan email yang sama dengan saat registrasi
+                  Enter the same email used during registration
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -108,7 +108,7 @@ const Payment = () => {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="contoh@email.com"
+                      placeholder="example@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -119,7 +119,7 @@ const Payment = () => {
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Mengecek..." : "Cek Status"}
+                    {isLoading ? "Checking..." : "Check Status"}
                   </Button>
                 </div>
               </CardContent>
@@ -129,18 +129,18 @@ const Payment = () => {
               <div className="text-center mb-6">
                 <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Registrasi Berhasil!
+                  Registration Successful!
                 </h3>
                 <p className="text-gray-600">
-                  Kami akan memverifikasi registrasi Anda dalam 1x24 jam
+                  We will verify your registration within 24 hours
                 </p>
               </div>
 
               <Card className="shadow-lg mb-6">
                 <CardHeader>
-                  <CardTitle>Kode Pembayaran Anda</CardTitle>
+                  <CardTitle>Your Payment Code</CardTitle>
                   <CardDescription>
-                    Kode ini sudah otomatis dibuat saat registrasi
+                    This code was automatically generated during registration
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -153,8 +153,8 @@ const Payment = () => {
                         paymentData.status === 'approved' ? 'text-green-600' : 
                         paymentData.status === 'pending' ? 'text-yellow-600' : 'text-red-600'
                       }`}>
-                        {paymentData.status === 'approved' ? 'Disetujui' : 
-                         paymentData.status === 'pending' ? 'Menunggu Verifikasi' : 'Ditolak'}
+                        {paymentData.status === 'approved' ? 'Approved' : 
+                         paymentData.status === 'pending' ? 'Awaiting Verification' : 'Rejected'}
                       </span>
                     </div>
                   </div>
@@ -165,13 +165,13 @@ const Payment = () => {
 
           <Card className="shadow-lg mb-6">
             <CardHeader>
-              <CardTitle>Verifikasi Registrasi</CardTitle>
+              <CardTitle>Registration Verification</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-blue-800 font-medium">
-                  Kami akan memverifikasi registrasi Anda dalam 1x24 jam. 
-                  Setelah diverifikasi, Anda dapat melakukan pembayaran dan mengakses tes TOVA.
+                  We will verify your registration within 24 hours. 
+                  After verification, you can make payment and access the TOVA test.
                 </p>
               </div>
             </CardContent>
@@ -179,21 +179,21 @@ const Payment = () => {
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Proses Selanjutnya</CardTitle>
+              <CardTitle>Next Steps</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">Langkah Selanjutnya:</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">Next Steps:</h4>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>1. Hubungi admin untuk detail pembayaran</li>
-                  <li>2. Lakukan pembayaran sesuai instruksi admin</li>
-                  <li>3. Tunggu persetujuan dari admin</li>
-                  <li>4. Setelah disetujui, Anda dapat mengakses tes</li>
+                  <li>1. Contact admin for payment details</li>
+                  <li>2. Make payment according to admin instructions</li>
+                  <li>3. Wait for admin approval</li>
+                  <li>4. After approval, you can access the test</li>
                 </ul>
               </div>
 
               <Button asChild className="w-full" size="lg">
-                <Link to="/test-access">Cek Status Pembayaran</Link>
+                <Link to="/test-access">Check Payment Status</Link>
               </Button>
             </CardContent>
           </Card>

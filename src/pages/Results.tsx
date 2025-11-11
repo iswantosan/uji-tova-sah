@@ -26,7 +26,7 @@ const Results = () => {
           console.error('No session data found');
           toast({
             title: "Error",
-            description: "Session tidak ditemukan.",
+            description: "Session not found.",
             variant: "destructive"
           });
           setLoading(false);
@@ -59,7 +59,7 @@ const Results = () => {
             console.error('Error fetching results:', response.error);
             toast({
               title: "Error",
-              description: `Gagal mengambil hasil tes: ${response.error.message}`,
+              description: `Failed to fetch test results: ${response.error.message}`,
               variant: "destructive"
             });
             setLoading(false);
@@ -69,8 +69,8 @@ const Results = () => {
           if (!response.data?.data) {
             console.log('No test results found');
             toast({
-              title: "Tidak Ada Data",
-              description: "Belum ada hasil tes untuk kode pembayaran ini.",
+              title: "No Data",
+              description: "No test results yet for this payment code.",
               variant: "destructive"
             });
             setLoading(false);
@@ -86,7 +86,7 @@ const Results = () => {
           participantInfo: {
             name: session.name,
             email: session.email || data.email,
-            testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
+            testDate: new Date(data.test_date).toLocaleDateString('en-US'),
             duration: data.duration
           },
           performance: {
@@ -109,7 +109,7 @@ const Results = () => {
               const emailData = {
                 email: session.email,
                 name: session.name,
-                testDate: new Date(data.test_date).toLocaleDateString('id-ID'),
+                testDate: new Date(data.test_date).toLocaleDateString('en-US'),
                 duration: data.duration,
                 attentiveness: Math.max(0, Math.min(100, 100 - (data.omission_errors * 2))),
                 impulsivity: Math.max(0, Math.min(100, 100 - (data.commission_errors * 3))),
@@ -131,21 +131,21 @@ const Results = () => {
               if (response.error) {
                 console.error('Email error:', response.error);
                 toast({
-                  title: "Peringatan",
-                  description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
+                  title: "Warning",
+                  description: "Email failed to send automatically, please click Email Results button",
                   variant: "default"
                 });
               } else {
                 toast({
-                  title: "Email Terkirim",
-                  description: "Hasil tes telah dikirim ke email Anda",
+                  title: "Email Sent",
+                  description: "Test results have been sent to your email",
                 });
               }
             } catch (emailError) {
               console.error('Error sending automatic email:', emailError);
               toast({
-                title: "Peringatan",
-                description: "Email gagal dikirim otomatis, silakan klik tombol Email Hasil",
+                title: "Warning",
+                description: "Email failed to send automatically, please click Email Results button",
                 variant: "default"
               });
             }
@@ -155,7 +155,7 @@ const Results = () => {
         console.error('Error:', error);
         toast({
           title: "Error",
-          description: "Terjadi kesalahan saat mengambil data.",
+          description: "An error occurred while fetching data.",
           variant: "destructive"
         });
       } finally {
@@ -171,7 +171,7 @@ const Results = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <Brain className="h-16 w-16 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-lg">Memuat hasil tes...</p>
+          <p className="text-lg">Loading test results...</p>
         </div>
       </div>
     );
@@ -182,10 +182,10 @@ const Results = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <Brain className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Hasil Tes Tidak Ditemukan</h2>
-          <p className="text-gray-600 mb-4">Belum ada hasil tes untuk akun ini.</p>
+          <h2 className="text-xl font-bold mb-2">Test Results Not Found</h2>
+          <p className="text-gray-600 mb-4">No test results available for this account.</p>
           <Button asChild>
-            <Link to="/">Kembali ke Beranda</Link>
+            <Link to="/">Back to Home</Link>
           </Button>
         </div>
       </div>
@@ -212,12 +212,12 @@ const Results = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Brain className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold text-primary">Hasil Tes TOVA</h1>
+              <h1 className="text-2xl font-bold text-primary">TOVA Test Results</h1>
             </div>
             <Button variant="outline" asChild>
               <Link to="/" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
-                <span>Beranda</span>
+                <span>Home</span>
               </Link>
             </Button>
           </div>
@@ -231,12 +231,12 @@ const Results = () => {
           {/* Participant Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Informasi Peserta</CardTitle>
+              <CardTitle>Participant Information</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Nama</p>
+                  <p className="text-sm text-muted-foreground">Name</p>
                   <p className="font-semibold">{testResults.participantInfo.name}</p>
                 </div>
                 <div>
@@ -244,11 +244,11 @@ const Results = () => {
                   <p className="font-semibold">{testResults.participantInfo.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Tanggal Tes</p>
+                  <p className="text-sm text-muted-foreground">Test Date</p>
                   <p className="font-semibold">{testResults.participantInfo.testDate}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Durasi Tes</p>
+                  <p className="text-sm text-muted-foreground">Test Duration</p>
                   <p className="font-semibold">{testResults.participantInfo.duration}</p>
                 </div>
               </div>
@@ -258,16 +258,16 @@ const Results = () => {
           {/* Performance Metrics */}
           <Card>
             <CardHeader>
-              <CardTitle>Metrik Kinerja</CardTitle>
+              <CardTitle>Performance Metrics</CardTitle>
               <CardDescription>
-                Hasil pengukuran perhatian dan konsentrasi
+                Attention and concentration measurement results
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Perhatian</span>
+                    <span className="text-sm font-medium">Attention</span>
                     <div className="flex items-center space-x-2">
                       {getPerformanceIcon(testResults.performance.attentiveness)}
                       <span className={`font-bold ${getPerformanceColor(testResults.performance.attentiveness)}`}>
@@ -280,7 +280,7 @@ const Results = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Kontrol Impuls</span>
+                    <span className="text-sm font-medium">Impulse Control</span>
                     <div className="flex items-center space-x-2">
                       {getPerformanceIcon(testResults.performance.impulsivity)}
                       <span className={`font-bold ${getPerformanceColor(testResults.performance.impulsivity)}`}>
@@ -293,7 +293,7 @@ const Results = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Konsistensi</span>
+                    <span className="text-sm font-medium">Consistency</span>
                     <div className="flex items-center space-x-2">
                       {getPerformanceIcon(testResults.performance.consistency)}
                       <span className={`font-bold ${getPerformanceColor(testResults.performance.consistency)}`}>
@@ -311,7 +311,7 @@ const Results = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Data Teknis</CardTitle>
+                <CardTitle>Technical Data</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -335,12 +335,12 @@ const Results = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Interpretasi Hasil</CardTitle>
+                <CardTitle>Results Interpretation</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>Keseluruhan:</span>
+                    <span>Overall:</span>
                     <span className={`font-semibold ${
                       testResults.performance.attentiveness >= 60 && 
                       testResults.performance.impulsivity >= 60 && 
@@ -352,28 +352,28 @@ const Results = () => {
                        testResults.performance.impulsivity >= 60 && 
                        testResults.performance.consistency >= 60 
                         ? 'Normal' 
-                        : 'Terganggu'}
+                        : 'Impaired'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Perhatian:</span>
+                    <span>Attention:</span>
                     <span className={`font-semibold ${getPerformanceColor(testResults.performance.attentiveness)}`}>
-                      {testResults.performance.attentiveness >= 80 ? 'Baik' : 
-                       testResults.performance.attentiveness >= 60 ? 'Sedang' : 'Perlu Perbaikan'}
+                      {testResults.performance.attentiveness >= 80 ? 'Good' : 
+                       testResults.performance.attentiveness >= 60 ? 'Fair' : 'Needs Improvement'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Kontrol Impuls:</span>
+                    <span>Impulse Control:</span>
                     <span className={`font-semibold ${getPerformanceColor(testResults.performance.impulsivity)}`}>
-                      {testResults.performance.impulsivity >= 80 ? 'Baik' : 
-                       testResults.performance.impulsivity >= 60 ? 'Sedang' : 'Perlu Perbaikan'}
+                      {testResults.performance.impulsivity >= 80 ? 'Good' : 
+                       testResults.performance.impulsivity >= 60 ? 'Fair' : 'Needs Improvement'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Konsistensi:</span>
+                    <span>Consistency:</span>
                     <span className={`font-semibold ${getPerformanceColor(testResults.performance.consistency)}`}>
-                      {testResults.performance.consistency >= 80 ? 'Baik' : 
-                       testResults.performance.consistency >= 60 ? 'Sedang' : 'Perlu Perbaikan'}
+                      {testResults.performance.consistency >= 80 ? 'Good' : 
+                       testResults.performance.consistency >= 60 ? 'Fair' : 'Needs Improvement'}
                     </span>
                   </div>
                 </div>
@@ -384,11 +384,11 @@ const Results = () => {
           {/* Recommendations */}
           <Card>
             <CardHeader>
-              <CardTitle>Rekomendasi</CardTitle>
+              <CardTitle>Recommendations</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 text-center text-muted-foreground">
-                <p>Konsultasikan hasil dengan profesional kesehatan mental untuk interpretasi yang lebih mendalam.</p>
+                <p>Consult with a mental health professional for a more in-depth interpretation of the results.</p>
               </div>
             </CardContent>
           </Card>
@@ -396,37 +396,37 @@ const Results = () => {
           {/* Actions */}
           <div className="flex justify-center space-x-4">
             <Button variant="outline" size="lg" asChild>
-              <Link to="/">Kembali ke Beranda</Link>
+              <Link to="/">Back to Home</Link>
             </Button>
             <Button 
               size="lg" 
               onClick={() => {
-                const emailSubject = encodeURIComponent('Hasil Tes TOVA - ' + testResults.participantInfo.name);
+                const emailSubject = encodeURIComponent('TOVA Test Results - ' + testResults.participantInfo.name);
                 const emailBody = encodeURIComponent(`
-Hasil Tes TOVA
+TOVA Test Results
 
-Nama: ${testResults.participantInfo.name}
+Name: ${testResults.participantInfo.name}
 Email: ${testResults.participantInfo.email}
-Tanggal Tes: ${testResults.participantInfo.testDate}
-Durasi Tes: ${testResults.participantInfo.duration}
+Test Date: ${testResults.participantInfo.testDate}
+Test Duration: ${testResults.participantInfo.duration}
 
-METRIK KINERJA:
-- Perhatian: ${testResults.performance.attentiveness}%
-- Kontrol Impuls: ${testResults.performance.impulsivity}%
-- Konsistensi: ${testResults.performance.consistency}%
+PERFORMANCE METRICS:
+- Attention: ${testResults.performance.attentiveness}%
+- Impulse Control: ${testResults.performance.impulsivity}%
+- Consistency: ${testResults.performance.consistency}%
 
-DATA TEKNIS:
+TECHNICAL DATA:
 - Omission Errors: ${testResults.performance.omissionErrors}
 - Commission Errors: ${testResults.performance.commissionErrors}
 - Response Time: ${testResults.performance.responseTime} ms
 - RT Variability: ${testResults.performance.responseTimeVariability} ms
 
-Konsultasikan hasil dengan profesional kesehatan mental untuk interpretasi yang lebih mendalam.
+Consult with a mental health professional for a more in-depth interpretation of the results.
                 `);
                 window.open(`mailto:?subject=${emailSubject}&body=${emailBody}`);
               }}
             >
-              Email Hasil
+              Email Results
             </Button>
           </div>
         </div>

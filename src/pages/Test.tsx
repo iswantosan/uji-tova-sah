@@ -74,7 +74,7 @@ const Test = () => {
       console.error('❌ No session in localStorage!');
       toast({
         title: "Error",
-        description: "Sesi hilang. Silakan mulai ulang dari verifikasi.",
+        description: "Session lost. Please restart from verification.",
         variant: "destructive"
       });
       isFinishingRef.current = false;
@@ -91,7 +91,7 @@ const Test = () => {
       console.error('❌ Missing email or payment_code in session!', session);
       toast({
         title: "Error",
-        description: "Data sesi tidak lengkap. Silakan mulai ulang.",
+        description: "Session data incomplete. Please restart.",
         variant: "destructive"
       });
       isFinishingRef.current = false;
@@ -166,8 +166,8 @@ const Test = () => {
         
         if (errorCode === '23505' || errorMessage?.includes('unique_payment_code') || errorMessage?.includes('duplicate key')) {
           toast({
-            title: "Kode Pembayaran Sudah Digunakan",
-            description: "Kode pembayaran ini sudah pernah dipakai. Silakan lihat hasil test sebelumnya atau hubungi admin.",
+            title: "Payment Code Already Used",
+            description: "This payment code has already been used. Please view your previous test results or contact admin.",
             variant: "destructive"
           });
           // Navigate to results to try to show existing result
@@ -179,22 +179,22 @@ const Test = () => {
         
         toast({
           title: "Warning",
-          description: "Tes selesai tapi ada masalah menyimpan hasil. Hubungi admin.",
+          description: "Test complete but there was a problem saving results. Contact admin.",
           variant: "destructive"
         });
       } else {
         console.log('Test results saved successfully:', data);
         
         toast({
-          title: "Tes Selesai!",
-          description: "Hasil telah disimpan. Mengarahkan ke halaman hasil...",
+          title: "Test Complete!",
+          description: "Results saved. Redirecting to results page...",
         });
       }
     } catch (error) {
       console.error('Unexpected error saving test results:', error);
       toast({
         title: "Error",
-        description: "Gagal menyimpan hasil tes. Hubungi admin.",
+        description: "Failed to save test results. Contact admin.",
         variant: "destructive"
       });
     }
@@ -317,7 +317,7 @@ const Test = () => {
     if (!paymentCode) {
       toast({
         title: "Error",
-        description: "Masukkan kode pembayaran",
+        description: "Enter payment code",
         variant: "destructive"
       });
       return;
@@ -336,8 +336,8 @@ const Test = () => {
 
       if (error || !payment) {
         toast({
-          title: "Kode Tidak Valid",
-          description: "Kode pembayaran tidak ditemukan atau belum disetujui admin.",
+          title: "Invalid Code",
+          description: "Payment code not found or not yet approved by admin.",
           variant: "destructive"
         });
         return;
@@ -356,8 +356,8 @@ const Test = () => {
       console.log('Session stored after verification:', { email: payment.email, payment_code: paymentCode });
 
       toast({
-        title: "Verifikasi Berhasil!",
-        description: "Kode pembayaran valid. Anda dapat memulai tes.",
+        title: "Verification Successful!",
+        description: "Payment code valid. You can start the test.",
       });
       
       setTestPhase('instructions');
@@ -365,7 +365,7 @@ const Test = () => {
       console.error('Error verifying payment:', error);
       toast({
         title: "Error",
-        description: "Terjadi kesalahan saat verifikasi.",
+        description: "An error occurred during verification.",
         variant: "destructive"
       });
     } finally {
@@ -377,8 +377,8 @@ const Test = () => {
     setTestPhase('test');
     setTestStartTime(Date.now());
     toast({
-      title: "Tes Dimulai",
-      description: "Tekan SPASI setiap kali melihat target. Fokus dan konsentrasi!",
+      title: "Test Started",
+      description: "Press SPACE each time you see a target. Focus and concentrate!",
     });
   };
 
@@ -388,13 +388,13 @@ const Test = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-lg mx-auto text-center">
             <Brain className="h-16 w-16 text-primary mx-auto mb-6" />
-            <h1 className="text-3xl font-bold mb-6">Verifikasi Kode Pembayaran</h1>
+            <h1 className="text-3xl font-bold mb-6">Verify Payment Code</h1>
             
             <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle className="text-white">Masukkan Kode Pembayaran</CardTitle>
+                <CardTitle className="text-white">Enter Payment Code</CardTitle>
                 <CardDescription className="text-gray-300">
-                  Kode pembayaran yang sudah disetujui admin
+                  Payment code that has been approved by admin
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -413,11 +413,11 @@ const Test = () => {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Memverifikasi..." : "Verifikasi & Mulai Tes"}
+                  {isLoading ? "Verifying..." : "Verify & Start Test"}
                 </Button>
                 
                 <Button variant="secondary" asChild className="w-full">
-                  <Link to="/test-access">Kembali</Link>
+                  <Link to="/test-access">Back</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -433,11 +433,11 @@ const Test = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <Brain className="h-16 w-16 text-primary mx-auto mb-6" />
-            <h1 className="text-3xl font-bold mb-6">Tes TOVA - Instruksi</h1>
+            <h1 className="text-3xl font-bold mb-6">TOVA Test - Instructions</h1>
             
             <Card className="bg-gray-800 border-gray-700 text-left">
               <CardHeader>
-                <CardTitle className="text-white">Cara Mengerjakan Tes TOVA:</CardTitle>
+                <CardTitle className="text-white">How to Take the TOVA Test:</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-300">
                 <div className="space-y-2">
@@ -447,7 +447,7 @@ const Test = () => {
                       <div className="w-full h-3 bg-white"></div>
                     </div>
                   </div>
-                  <p className="text-sm">Tekan SPASI ketika melihat kotak dengan garis di ATAS</p>
+                  <p className="text-sm">Press SPACE when you see a box with a line at the TOP</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -457,18 +457,18 @@ const Test = () => {
                       <div className="w-full h-3 bg-white mt-6"></div>
                     </div>
                   </div>
-                  <p className="text-sm">JANGAN tekan SPASI untuk kotak dengan garis di BAWAH</p>
+                  <p className="text-sm">DO NOT press SPACE for boxes with a line at the BOTTOM</p>
                 </div>
 
                 <div className="bg-blue-900 p-4 rounded">
-                  <h4 className="font-semibold mb-2">Aturan Penting:</h4>
+                  <h4 className="font-semibold mb-2">Important Rules:</h4>
                   <ul className="text-sm space-y-1">
-                    <li>• Durasi tes: 21.6 menit (648 stimulus)</li>
-                    <li>• Stimulus muncul 0.1 detik, interval 2 detik</li>
-                    <li>• Respon hanya dengan menekan SPASI untuk target</li>
-                    <li>• Tetap fokus pada layar sepanjang tes</li>
-                    <li>• Respon secepatnya saat melihat target</li>
-                    <li>• Ini adalah tes konsentrasi yang menantang</li>
+                    <li>• Test duration: 21.6 minutes (648 stimuli)</li>
+                    <li>• Stimulus appears for 0.1 seconds, 2-second interval</li>
+                    <li>• Respond only by pressing SPACE for targets</li>
+                    <li>• Stay focused on the screen throughout the test</li>
+                    <li>• Respond as quickly as possible when you see a target</li>
+                    <li>• This is a challenging concentration test</li>
                   </ul>
                 </div>
               </CardContent>
@@ -476,10 +476,10 @@ const Test = () => {
 
             <div className="mt-8 space-y-4">
               <Button onClick={startTest} size="lg" className="w-full">
-                Mulai Tes TOVA
+                Start TOVA Test
               </Button>
               <Button variant="secondary" asChild>
-                <Link to="/test-access">Kembali</Link>
+                <Link to="/test-access">Back</Link>
               </Button>
             </div>
           </div>
@@ -523,7 +523,7 @@ const Test = () => {
             
             {showInstructions && (
               <p className="text-gray-400 text-sm">
-                Tekan SPASI untuk target (garis di atas)
+                Press SPACE for target (line at top)
               </p>
             )}
           </div>
@@ -536,7 +536,7 @@ const Test = () => {
             variant="destructive" 
             size="sm"
           >
-            Hentikan Tes & Lihat Hasil
+            Stop Test & View Results
           </Button>
         </div>
       </div>
@@ -548,13 +548,13 @@ const Test = () => {
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
           <Brain className="h-16 w-16 text-success mx-auto mb-6" />
-          <h1 className="text-3xl font-bold mb-4">Tes Selesai!</h1>
+          <h1 className="text-3xl font-bold mb-4">Test Complete!</h1>
           <p className="text-lg text-gray-400 mb-8">
-            Terima kasih telah menyelesaikan tes TOVA.<br />
-            Hasil tes sedang diproses...
+            Thank you for completing the TOVA test.<br />
+            Your test results are being processed...
           </p>
           <Button asChild>
-            <Link to="/results">Lihat Hasil</Link>
+            <Link to="/results">View Results</Link>
           </Button>
         </div>
       </div>
