@@ -620,6 +620,7 @@ const Admin = () => {
                       <TableHead>Email</TableHead>
                       <TableHead>Payment Code</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead>Payment Proof</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -637,6 +638,21 @@ const Admin = () => {
                           <TableCell>{payment.email}</TableCell>
                           <TableCell className="font-mono">{payment.payment_code}</TableCell>
                           <TableCell>{new Date(payment.created_at).toLocaleDateString('en-US')}</TableCell>
+                          <TableCell>
+                            {payment.proof_url ? (
+                              <a 
+                                href={payment.proof_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline flex items-center gap-1"
+                              >
+                                <Eye className="h-4 w-4" />
+                                View Proof
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">Not uploaded</span>
+                            )}
+                          </TableCell>
                           <TableCell>{getStatusBadge(payment.status)}</TableCell>
                           <TableCell>
                             {payment.status === 'pending' && (
