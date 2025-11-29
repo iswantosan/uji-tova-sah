@@ -118,16 +118,19 @@ const Payment = () => {
         .from('payment-proofs')
         .getPublicUrl(filePath);
 
-      // Update payment record with proof URL
+      // Update payment record with proof URL and set status to pending
       const { error: updateError } = await supabase
         .from('payments')
-        .update({ proof_url: urlData.publicUrl })
+        .update({ 
+          proof_url: urlData.publicUrl,
+          status: 'pending'
+        })
         .eq('id', paymentData.id);
 
       if (updateError) throw updateError;
 
       // Update local state
-      setPaymentData({ ...paymentData, proof_url: urlData.publicUrl });
+      setPaymentData({ ...paymentData, proof_url: urlData.publicUrl, status: 'pending' });
       setProofFile(null);
 
       toast({
