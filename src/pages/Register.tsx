@@ -87,10 +87,11 @@ const Register = () => {
         throw paymentError;
       }
 
-      // Store session for direct test access
+      // Store session for direct payment access
       localStorage.setItem('tova_session', JSON.stringify({
         email: formData.email,
-        name: formData.name
+        name: formData.name,
+        payment_code: paymentCode
       }));
 
       toast({

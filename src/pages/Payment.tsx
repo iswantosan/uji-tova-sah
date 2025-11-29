@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,59 +9,64 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Payment = () => {
-  const [email, setEmail] = useState("");
   const [paymentData, setPaymentData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const checkPaymentStatus = async () => {
-    if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email",
-        variant: "destructive"
-      });
-      return;
-    }
+  // Load payment data on mount
+  useEffect(() => {
+    const loadPaymentData = async () => {
+      try {
+        // Get email from localStorage (set during registration)
+        const session = localStorage.getItem('tova_session');
+        if (!session) {
+          toast({
+            title: "Error",
+            description: "Please register first",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
 
-    setIsLoading(true);
+        const { email } = JSON.parse(session);
 
-    try {
-      // Check payment record
-      const { data: payment, error: paymentError } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('email', email)
-        .single();
+        // Fetch payment record
+        const { data: payment, error: paymentError } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('email', email)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
 
-      if (paymentError || !payment) {
+        if (paymentError || !payment) {
+          toast({
+            title: "Error",
+            description: "Payment record not found. Please register again.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        setPaymentData(payment);
+      } catch (error) {
+        console.error('Error loading payment:', error);
         toast({
           title: "Error",
-          description: "Email not found or not yet registered.",
+          description: "An error occurred. Please try again.",
           variant: "destructive"
         });
-        return;
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      setPaymentData(payment);
-      
-      toast({
-        title: "Data Found!",
-        description: "Your payment information has been found.",
-      });
-    } catch (error) {
-      console.error('Error checking payment:', error);
-      toast({
-        title: "Error",
-        description: "An error occurred. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    loadPaymentData();
+  }, [toast]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -174,45 +179,20 @@ const Payment = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Registration & Payment Status
+              Complete Your Payment
             </h2>
             <p className="text-lg text-gray-600">
-              Check your registration status and payment code
+              Upload proof of payment to start your TOVA test
             </p>
           </div>
 
-          {!paymentData ? (
+          {isLoading ? (
             <Card className="shadow-lg mb-6">
-              <CardHeader>
-                <CardTitle>Check Registration Status</CardTitle>
-                <CardDescription>
-                  Enter the same email used during registration
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="example@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button 
-                    onClick={checkPaymentStatus}
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Checking..." : "Check Status"}
-                  </Button>
-                </div>
+              <CardContent className="py-12 text-center">
+                <p className="text-gray-600">Loading payment information...</p>
               </CardContent>
             </Card>
-          ) : (
+          ) : paymentData ? (
             <>
               <div className="text-center mb-6">
                 <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
@@ -335,6 +315,15 @@ const Payment = () => {
                 </Card>
               )}
             </>
+          ) : (
+            <Card className="shadow-lg">
+              <CardContent className="py-12 text-center">
+                <p className="text-gray-600">Please complete registration first</p>
+                <Button asChild className="mt-4">
+                  <Link to="/register">Go to Registration</Link>
+                </Button>
+              </CardContent>
+            </Card>
           )}
 
           {paymentData && paymentData.status === 'approved' && (
